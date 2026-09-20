@@ -1,33 +1,60 @@
-# Signal
+# Signal — Website Audit
 
-Signal turns one public page URL into an actionable website audit across SEO foundations, content quality, and AI/search readiness.
+[![Verify](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml)
 
-## What it checks
+Signal audits one public website page and turns its HTML into practical SEO, content, and AI/search-readiness recommendations.
 
-- Page titles, meta descriptions, headings, canonical declarations, HTTPS, language and viewport tags
-- Image alt attributes, indexing and snippet directives, structured-data JSON syntax, and up to 12 same-origin links
-- Extracted word count, English reading ease, long paragraphs, repeated sentences, and common page topics
-- Text availability and content structure for AI/search discovery without claiming ranking or citation predictions
+[Live app](https://signal-audit-lab.shabeehshah42.chatgpt.site) · [Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
 
-Each finding includes observed evidence, a next step, and a Critical, Improvement, or Good priority. The client can download a complete standalone HTML report, which can be printed to PDF.
+## Features
 
-## Run locally
+- **SEO foundations:** title, description, headings, alt attributes, HTTPS, canonical tags, language, viewport, indexing directives, and sampled internal links.
+- **Content quality:** extracted word count, English reading ease, long paragraphs, repeated sentences, and frequent on-page topics.
+- **AI/search readiness:** text availability, content structure, question-led sections, snippet controls, and structured-data opportunities.
+- **Actionable output:** weighted category scores, evidence for each finding, filters, a responsive interface, and a downloadable standalone HTML report.
 
-Use Node 22.13 or later:
+## Quick start
+
+**Requirements:** Node.js 22.13 or later.
 
 ```sh
+git clone https://github.com/shabeeh-shah/SEO-Audit-Tool.git
+cd SEO-Audit-Tool
 npm ci
 npm run dev
 ```
 
-Run `npm run build` to create the Cloudflare Worker and browser assets.
+Open the local URL shown in your terminal. Run `npm run build` for a production build.
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start local development. |
+| `npm run typecheck` | Validate TypeScript. |
+| `npm test` | Run audit parsing, safety, and export checks. |
+| `npm run build` | Build the Cloudflare Worker and browser assets. |
+| `npm run lint` | Run ESLint. |
+
+## How audits work
+
+The app fetches one public HTML page, follows at most four redirects, and checks up to 12 eligible same-origin links. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, and AI/GEO category scores.
 
 ## Scope and safety
 
-The audit reads server-delivered HTML for one page and samples up to 12 eligible internal links. It does not execute audited-page JavaScript, crawl a full site, inspect robots.txt, measure Core Web Vitals, or determine actual indexing, backlinks, traffic, or AI citations. Scores are app-defined weighted checks, not rankings.
+The audit does not execute audited-page JavaScript, crawl a full site, inspect `robots.txt`, measure Core Web Vitals, or determine actual search indexing, backlinks, traffic, or AI citations. Scores are useful checklists, not rankings or guarantees.
 
-The endpoint accepts only public HTTP(S) URLs without custom ports or credentials, limits request and response bodies, checks redirect destinations, bounds link concurrency and timeouts, and forwards no user credentials to audited websites. It is intended for Cloudflare Workers with default public-only fetch and `global_fetch_strictly_public`; a Node or private-network deployment needs independent outbound egress protections.
+Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, and never forwards user credentials to audited sites. The deployment targets Cloudflare Workers with public-only fetch and `global_fetch_strictly_public` enabled.
 
-## Verification
+## Contributing
 
-TypeScript validation and the audit fixture suite cover extraction, scoring, robots directives, link sampling, address restrictions, real public fetches, and escaped report export. The browser flow was checked for live results, filters, expanded evidence, mobile layout, download completion, and its WebMCP audit action.
+1. Create a branch from `main`.
+2. Make a focused change with clear, user-facing behavior.
+3. Run `npm run typecheck`, `npm test`, and `npm run build`.
+4. Open a pull request describing the change and validation.
+
+Please do not open a public issue with a possible security vulnerability. Contact the repository owner privately instead.
+
+## License
+
+No license has been selected yet. Choose a license before accepting external contributions or allowing reuse.

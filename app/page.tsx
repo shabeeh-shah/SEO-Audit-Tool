@@ -1,6 +1,7 @@
 'use client';
 import {useState,useEffect,useCallback,useRef} from 'react';
 import {flushSync} from 'react-dom';
+import Link from 'next/link';
 import {ArrowUpRight, ArrowRight, ChartNoAxesColumnIncreasing, Globe2, Search, Sparkles, FileText, Download, CircleHelp, Check, AlertCircle, LoaderCircle, X, Info} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -33,7 +34,7 @@ export default function Home(){
 
  const findings=audit.findings.filter(f=>(category==='all'||f.category===category)&&(filter==='all'||f.status===filter));
  return <div className="app-shell">
-  <header className="site-header"><a className="brand" href="/" aria-label="Signal home"><span className="brand-icon"><ChartNoAxesColumnIncreasing size={23}/></span>signal<span className="brand-period">.</span></a><div className="header-section">Website intelligence</div><Button variant="ghost" className="help-button" onClick={()=>setHelp(true)}><CircleHelp/> How it works</Button></header>
+  <header className="site-header"><Link className="brand" href="/" aria-label="Signal home"><span className="brand-icon"><ChartNoAxesColumnIncreasing size={23}/></span>signal<span className="brand-period">.</span></Link><div className="header-section">Website intelligence</div><Button variant="ghost" className="help-button" onClick={()=>setHelp(true)}><CircleHelp/> How it works</Button></header>
   <main>
    <section className="audit-starter"><div className="starter-copy"><div className="eyebrow"><span className="tiny-line"/> FIND YOUR NEXT OPPORTUNITY</div><h1>A clearer picture of your website.</h1><p>Turn your URL into an actionable SEO, content, and AI readiness audit.</p></div><form className="audit-form" onSubmit={e=>{e.preventDefault();void runAudit(url).catch(()=>{});}} aria-busy={loading}><label htmlFor="website-url">Website URL</label><div className="url-control"><Globe2 size={20}/><Input id="website-url" placeholder="https://yourwebsite.com" type="text" inputMode="url" autoComplete="url" value={url} onChange={e=>setUrl(e.target.value)} disabled={loading} aria-describedby="audit-note" maxLength={2048} required/><Button type="submit" disabled={loading}>{loading?<><LoaderCircle className="spin"/> Auditing…</>:<>Run audit <ArrowRight size={17}/></>}</Button></div><p id="audit-note">Public pages only · Up to 12 internal links · Usually under 30 seconds</p>{loading&&<div className="loading-note" role="status"><span>Fetching page content and checking internal links…</span><Button type="button" variant="ghost" onClick={()=>active.current?.abort()}>Cancel</Button></div>}{error&&<p className="form-error" role="alert"><AlertCircle size={16}/>{error}</p>}</form></section>
    <div className="workspace">{notice&&<div className="notice" role="status"><Check size={16}/>{notice}<Button variant="ghost" size="icon-sm" aria-label="Dismiss notification" onClick={()=>setNotice('')}><X size={14}/></Button></div>}
