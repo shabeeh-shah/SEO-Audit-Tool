@@ -1,5 +1,4 @@
-// Use only Cloudflare Workers default public-only global fetch; never a private/VPC binding.
-// DNS preflight is defense in depth, not IP pinning. Other runtimes require egress protection.
+// DNS preflight is defense in depth, not IP pinning. Deployments still require egress protection.
 // Redirect destinations are revalidated.
 export function normalizeUrl(input: string): URL {
   if (typeof input !== 'string' || input.length > 2048 || !input.trim()) throw new Error('Enter a public website URL, such as https://example.com.');

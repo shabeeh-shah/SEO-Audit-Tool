@@ -4,7 +4,7 @@
 
 Signal audits one public website page and turns its HTML into practical SEO, content, and AI/search-readiness recommendations.
 
-[Live app](https://signal-audit-lab.shabeehshah42.chatgpt.site) · [Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
+[Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
 
 ## Features
 
@@ -26,6 +26,10 @@ npm run dev
 
 Open the local URL shown in your terminal. Run `npm run build` for a production build.
 
+## Standalone demo
+
+Open `demo.html` directly in any browser for a polished, no-install preview of the product. It uses fixed sample data and never sends a request to the entered URL.
+
 ## Commands
 
 | Command | Purpose |
@@ -33,7 +37,8 @@ Open the local URL shown in your terminal. Run `npm run build` for a production 
 | `npm run dev` | Start local development. |
 | `npm run typecheck` | Validate TypeScript. |
 | `npm test` | Run audit parsing, safety, and export checks. |
-| `npm run build` | Build the Cloudflare Worker and browser assets. |
+| `npm run preview` | Preview the production build locally. |
+| `npm run build` | Build the application. |
 | `npm run lint` | Run ESLint. |
 
 ## How audits work
@@ -44,7 +49,7 @@ The app fetches one public HTML page, follows at most four redirects, and checks
 
 The audit does not execute audited-page JavaScript, crawl a full site, inspect `robots.txt`, measure Core Web Vitals, or determine actual search indexing, backlinks, traffic, or AI citations. Scores are useful checklists, not rankings or guarantees.
 
-Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, and never forwards user credentials to audited sites. The deployment targets Cloudflare Workers with public-only fetch and `global_fetch_strictly_public` enabled.
+Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, and never forwards user credentials to audited sites.
 
 ## Contributing
 
