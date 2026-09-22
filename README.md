@@ -4,7 +4,7 @@
 
 Signal audits one public website page and turns its HTML into practical SEO, content, and AI/search-readiness recommendations.
 
-[Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
+[Try the live audit](https://signal-audit-lab.shabeehshah42.chatgpt.site) · [Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
 
 ## Features
 
@@ -28,7 +28,7 @@ Open the local URL shown in your terminal. Run `npm run build` for a production 
 
 ## Standalone demo
 
-Open `demo.html` directly in any browser for a polished, no-install preview of the product. It uses fixed sample data and never sends a request to the entered URL.
+Open `demo.html` directly in any browser for a polished, no-install preview of the product. It uses fixed sample data and never sends a request to the entered URL. Use the live audit when you want to analyze a public website.
 
 ## Commands
 
