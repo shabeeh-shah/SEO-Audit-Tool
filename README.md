@@ -43,7 +43,7 @@ Open `demo.html` directly in any browser for a polished, no-install preview of t
 
 ## How audits work
 
-The app fetches one public HTML page, follows at most four redirects, and checks up to 12 eligible same-origin links. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, and AI/GEO category scores.
+The app fetches one public HTML page, follows at most four redirects, and checks a focused sample of up to 8 eligible same-origin links. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, and AI/GEO category scores.
 
 ## Scope and safety
 

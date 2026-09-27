@@ -33,9 +33,10 @@
       .eyebrow { margin:0 0 4px; color:var(--muted); font-size:12px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; } .score-card h3 { margin:0; font-size:19px; letter-spacing:-.4px; } .score-card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
       .small-score { min-height:144px; } .small-score b { display:block; font-size:33px; letter-spacing:-1px; margin:9px 0 5px; } .bar { height:7px; overflow:hidden; background:#e9efed; border-radius:99px; } .bar span { display:block; height:100%; background:var(--green); border-radius:99px; }
       .lower { display:grid; grid-template-columns:1.35fr .9fr; gap:14px; margin-top:14px; } .finding { display:flex; gap:12px; padding:14px 0; border-top:1px solid var(--line); } .finding:first-of-type { border-top:0; padding-top:5px; } .status { flex:0 0 auto; border-radius:999px; padding:3px 8px; height:25px; font-size:11px; font-weight:800; } .good { color:#17624e; background:#e5f5ed; } .improve { color:#92500c; background:#fff0d9; } .critical { color:#a83735; background:#fce5e4; }
+      .quick-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; } .summary-card { border-top:3px solid var(--green); } .summary-card.attention { border-top-color:var(--amber); } .summary-card.next { border-top-color:#2f7eaa; } .summary-title { display:flex; gap:9px; align-items:center; margin-bottom:11px; } .summary-title i { display:grid; place-items:center; width:27px; height:27px; border-radius:8px; font-style:normal; background:var(--pale); color:var(--green); } .summary-card.attention i { background:#fff0dd; color:var(--amber); } .summary-card.next i { background:#e9f2f7; color:#2f7eaa; } .summary-title p { margin:0; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; } .summary-title h3 { margin:2px 0 0; font-size:15px; } .summary-card ul, .summary-card ol { display:grid; gap:7px; margin:0; padding-left:18px; color:var(--muted); } .summary-card li { font-size:12px; line-height:1.45; }
       .finding h3 { margin:0; font-size:14px; } .finding p { margin:3px 0 0; color:var(--muted); font-size:13px; } .priority { display:grid; gap:12px; margin-top:14px; } .priority div { padding:13px; border-radius:11px; background:#f6f8f7; } .priority b { display:block; margin-bottom:3px; font-size:13px; } .priority span { color:var(--muted); font-size:12px; }
       footer { padding:26px 0 42px; color:var(--muted); text-align:center; font-size:13px; }
-      @media (max-width:760px) { header { height:64px; } .hero { padding-top:42px; } .audit-form { flex-wrap:wrap; } .audit-form input { height:42px; flex-basis:100%; } .audit-form button { flex:1; } .scores,.lower { grid-template-columns:1fr; } .dashboard-top { align-items:flex-start; flex-direction:column; gap:5px; } h1 { letter-spacing:-2px; } }
+      @media (max-width:760px) { header { height:64px; } .hero { padding-top:42px; } .audit-form { flex-wrap:wrap; } .audit-form input { height:42px; flex-basis:100%; } .audit-form button { flex:1; } .scores,.quick-summary,.lower { grid-template-columns:1fr; } .dashboard-top { align-items:flex-start; flex-direction:column; gap:5px; } h1 { letter-spacing:-2px; } }
     </style>
   </head>
   <body>
@@ -57,6 +58,11 @@
             <article class="card small-score"><p class="eyebrow">SEO</p><b id="seo">81</b><div class="bar"><span id="seo-bar" style="width:81%"></span></div></article>
             <article class="card small-score"><p class="eyebrow">Content</p><b id="content">92</b><div class="bar"><span id="content-bar" style="width:92%"></span></div></article>
             <article class="card small-score"><p class="eyebrow">AI / GEO</p><b id="geo">70</b><div class="bar"><span id="geo-bar" style="width:70%"></span></div></article>
+          </div>
+          <div class="quick-summary">
+            <article class="card summary-card"><div class="summary-title"><i>✓</i><div><p>What’s working</p><h3>Keep these strengths</h3></div></div><ul id="working"></ul></article>
+            <article class="card summary-card attention"><div class="summary-title"><i>!</i><div><p>Needs attention</p><h3>Focus on impact</h3></div></div><ul id="attention"></ul></article>
+            <article class="card summary-card next"><div class="summary-title"><i>→</i><div><p>Next steps</p><h3>Start here</h3></div></div><ol id="steps"></ol></article>
           </div>
           <div class="lower">
             <article class="card"><p class="eyebrow">What to address</p><h2>Prioritized findings</h2><div id="findings"></div></article>
@@ -80,6 +86,11 @@
         ids.forEach((id, index) => { const score = report.scores[index + 1]; document.querySelector("#" + id).textContent = score; document.querySelector("#" + id + "-bar").style.width = score + "%"; });
         document.querySelector("#findings").innerHTML = report.findings.map(([level,title,copy]) => `<div class="finding"><span class="status ${level.toLowerCase()}">${level}</span><div><h3>${title}</h3><p>${copy}</p></div></div>`).join("");
         document.querySelector("#priorities").innerHTML = report.priorities.map(([title,copy]) => `<div><b>${title}</b><span>${copy}</span></div>`).join("");
+        const positive = report.findings.filter(([level]) => level === "Good").slice(0, 2);
+        const attention = report.findings.filter(([level]) => level !== "Good").slice(0, 2);
+        document.querySelector("#working").innerHTML = (positive.length ? positive : [["", "Run a live audit for page-specific strengths."]]).map(([, title]) => `<li>${title}</li>`).join("");
+        document.querySelector("#attention").innerHTML = (attention.length ? attention : [["", "No urgent issues were found."]]).map(([, title]) => `<li>${title}</li>`).join("");
+        document.querySelector("#steps").innerHTML = report.priorities.map(([title]) => `<li>${title}</li>`).join("");
       }
       document.querySelector("#sample").onclick = () => { document.querySelector("#url").value = "https://northstar.example"; render(reports.sample); };
       document.querySelector("#safe-test").onclick = () => { document.querySelector("#url").value = "https://example.com"; render(reports.test); };

@@ -2,7 +2,7 @@ import type { Audit } from './types';
 export const sampleAudit: Audit = {
   sample:true,url:'https://northstar.example',requestedUrl:'https://northstar.example',title:'Northstar — Design for what’s next',description:'Independent design studio.',date:'2026-09-19T12:00:00Z',
   score:72,scores:{seo:68,content:84,geo:64},
-  metrics:{words:842,readingEase:66,headings:7,h1:1,h2:6,images:12,missingAlt:3,links:24,checkedLinks:12,responseMs:382,htmlKb:46,schemaTypes:[]},
+  metrics:{words:842,readingEase:66,headings:7,h1:1,h2:6,images:12,missingAlt:3,links:24,checkedLinks:8,responseMs:382,htmlKb:46,schemaTypes:[]},
   keywords:[{word:'design',count:18,density:2.1},{word:'brand',count:12,density:1.4},{word:'strategy',count:9,density:1.1},{word:'studio',count:7,density:0.8}],
   headings:[{level:1,text:'Design for what’s next'},{level:2,text:'Ideas with a point of view'},{level:2,text:'Our selected work'},{level:2,text:'A thoughtful approach'}],linkResults:[],
   findings:[
@@ -14,7 +14,7 @@ export const sampleAudit: Audit = {
     {id:'readability',category:'content',status:'good',title:'Your copy is easy to follow',evidence:'The estimated English reading-ease score is 66 / 100.',recommendation:'Keep using direct sentences, familiar words, and useful section headings.',weight:1},
     {id:'https',category:'seo',status:'good',title:'A secure connection is in place',evidence:'The page is served over HTTPS.',recommendation:'Keep all page assets and internal links on HTTPS.',weight:2},
     {id:'structure',category:'geo',status:'good',title:'Content is organized into useful sections',evidence:'Six H2 headings divide the main content.',recommendation:'Keep each heading specific and place its explanation directly beneath it.',weight:1}
-  ], limitations:['This is an illustrative sample, not a live audit.','Live audits inspect one page’s server-delivered HTML and up to 12 internal links.','Scores are heuristic indicators, not search rankings or AI citation predictions.']
+  ], limitations:['This is an illustrative sample, not a live audit.','Live audits inspect one page’s server-delivered HTML and up to 8 internal links.','Scores are heuristic indicators, not search rankings or AI citation predictions.']
 };
 
 for (const category of ['seo','content','geo'] as const) {
