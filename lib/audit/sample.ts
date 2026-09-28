@@ -2,7 +2,7 @@ import type { Audit } from './types';
 export const sampleAudit: Audit = {
   sample:true,url:'https://northstar.example',requestedUrl:'https://northstar.example',title:'Northstar — Design for what’s next',description:'Independent design studio.',date:'2026-09-19T12:00:00Z',
   score:72,scores:{seo:68,content:84,geo:64},
-  metrics:{words:842,readingEase:66,headings:7,h1:1,h2:6,images:12,missingAlt:3,links:24,checkedLinks:8,responseMs:382,htmlKb:46,schemaTypes:[]},
+  metrics:{words:842,readingEase:66,headings:7,h1:1,h2:6,images:12,missingAlt:3,links:24,checkedLinks:8,responseMs:382,htmlKb:46,schemaTypes:[],redirects:0,robotsTxt:{url:'https://northstar.example/robots.txt',status:200,redirects:0},sitemapXml:{url:'https://northstar.example/sitemap.xml',status:200,redirects:0}},
   keywords:[{word:'design',count:18,density:2.1},{word:'brand',count:12,density:1.4},{word:'strategy',count:9,density:1.1},{word:'studio',count:7,density:0.8}],
   preview:{image:null,favicon:null,headline:'Design for what’s next'},
   headings:[{level:1,text:'Design for what’s next'},{level:2,text:'Ideas with a point of view'},{level:2,text:'Our selected work'},{level:2,text:'A thoughtful approach'}],linkResults:[],
