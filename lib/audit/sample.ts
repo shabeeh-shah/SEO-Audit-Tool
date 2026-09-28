@@ -4,6 +4,7 @@ export const sampleAudit: Audit = {
   score:72,scores:{seo:68,content:84,geo:64},
   metrics:{words:842,readingEase:66,headings:7,h1:1,h2:6,images:12,missingAlt:3,links:24,checkedLinks:8,responseMs:382,htmlKb:46,schemaTypes:[]},
   keywords:[{word:'design',count:18,density:2.1},{word:'brand',count:12,density:1.4},{word:'strategy',count:9,density:1.1},{word:'studio',count:7,density:0.8}],
+  preview:{image:null,favicon:null,headline:'Design for what’s next'},
   headings:[{level:1,text:'Design for what’s next'},{level:2,text:'Ideas with a point of view'},{level:2,text:'Our selected work'},{level:2,text:'A thoughtful approach'}],linkResults:[],
   findings:[
     {id:'alt',category:'seo',status:'improvement',title:'Give your images a little more context',evidence:'3 of 12 images have no alt attribute.',recommendation:'Add descriptive alt text to informative images. Use an empty alt attribute for purely decorative images.',weight:2},
