@@ -45,6 +45,15 @@ function accessFor(groups: Group[], bot: string, pathname: string): BotAccess {
   return { bot, state: chosen.directive === 'disallow' ? 'blocked' : 'allowed', source, rule: `${chosen.directive === 'disallow' ? 'Disallow' : 'Allow'}: ${chosen.path}` };
 }
 
+export function robotsAllows(text:string|null,pageUrl:string,agent='SignalAudit'):boolean|null{
+  if(text===null)return null;
+  const groups=parseGroups(text);const normalized=agent.toLowerCase();const exact=groups.filter(group=>group.agents.includes(normalized));const wildcard=groups.filter(group=>group.agents.includes('*'));const candidates=exact.length?exact:wildcard;
+  const rules=candidates.flatMap(group=>group.rules).filter(rule=>matches(new URL(pageUrl).pathname||'/',rule.path));
+  if(!rules.length)return true;
+  const longest=Math.max(...rules.map(rule=>rule.path.length));const chosen=rules.filter(rule=>rule.path.length===longest).sort((a,b)=>a.directive==='allow'?-1:b.directive==='allow'?1:0)[0];
+  return chosen.directive!=='disallow';
+}
+
 export function aiBotAccess(text: string | null, pageUrl: string): BotAccess[] {
   if (text === null) return botNames.map(bot => ({ bot, state: 'unknown', source: 'robots.txt unavailable', rule: 'No robots.txt content was available to evaluate.' }));
   const groups = parseGroups(text);
