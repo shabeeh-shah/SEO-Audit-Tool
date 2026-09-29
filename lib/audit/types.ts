@@ -8,7 +8,7 @@ export type PagePreview = { image: string | null; favicon: string | null; headli
 export type Audit = {
   url: string; requestedUrl: string; title: string; description: string; date: string; sample?: boolean;
   scores: Record<Category, number>; score: number; findings: Finding[];
-  metrics: { words: number; readingEase: number | null; headings: number; h1: number; h2: number; images: number; missingAlt: number; links: number; checkedLinks: number; responseMs: number; htmlKb: number; schemaTypes: string[]; redirects: number; robotsTxt: ResourceCheck; sitemapXml: ResourceCheck; };
+  metrics: { words: number; rawHtmlWords: number; scriptCount: number; readingEase: number | null; headings: number; h1: number; h2: number; images: number; missingAlt: number; links: number; checkedLinks: number; responseMs: number; htmlKb: number; schemaTypes: string[]; redirects: number; robotsTxt: ResourceCheck; sitemapXml: ResourceCheck; };
   keywords: { word: string; count: number; density: number }[]; headings: { level: number; text: string }[]; linkResults: LinkResult[]; limitations: string[];
   preview: PagePreview;
   aiReadiness: { bots: BotAccess[]; llmsTxt: ResourceCheck; questionHeadings: number; conciseAnswers: number; authorSignals: string[]; dateSignals: string[]; jsonLdBlocks: number; invalidJsonLd: number; relevantSchemaTypes: string[]; };

@@ -17,6 +17,8 @@ const audit = analyzePage(fixture, "https://studio.com/", {
 assert.equal(audit.metrics.missingAlt, 1);
 assert.equal(audit.metrics.images, 2);
 assert.equal(audit.metrics.h2, 2);
+assert(audit.metrics.rawHtmlWords > 0);
+assert.equal(audit.metrics.scriptCount, 1);
 assert(audit.metrics.readingEase !== null);
 assert.deepEqual(audit.metrics.schemaTypes, ["Organization"]);
 assert.equal(audit.findings.find((finding) => finding.id === "indexing")?.status, "good");
