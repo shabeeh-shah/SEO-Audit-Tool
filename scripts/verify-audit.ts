@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { analyzePage, discoverLinks } from "../lib/audit/analyze";
 import { normalizeUrl, publicAddress } from "../lib/audit/fetch";
 import { reportHtml } from "../lib/audit/export";
+import { aiBotAccess } from "../lib/audit/robots";
 
 const fixture = `<!doctype html><html lang="en"><head><title>Honest Studio — Accessible web design</title><meta name="description" content="We create useful websites for independent businesses, combining clear content, accessible design, and thoughtful engineering."><meta name="robots" content="max-image-preview:none"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://studio.com/"><meta property="og:title" content="Honest Studio"><meta property="og:description" content="Accessible web design"><meta property="og:image" content="https://studio.com/share.jpg"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@type":"Organization","name":"Studio"}</script></head><body><nav>EXCLUDED NAV TEXT</nav><main><h1>Websites for independent businesses</h1><h2>Our process</h2><p>${"Clear writing helps people understand the information they need today. ".repeat(4)}</p><h2>What makes a website useful?</h2><p>${"Useful websites help people find answers. Good headings explain each section. We build pages with care. Our team reviews every detail. Everyone can use clear instructions. ".repeat(3)}</p><img src="one.png"><img src="two.png" alt=""><a href="/about#one">About</a><a href="/about#two">About again</a><a href="https://elsewhere.com">Outside</a><a href="/missing">Missing</a><a href="/brochure.pdf">PDF</a></main><footer>EXCLUDED FOOTER</footer></body></html>`;
 
@@ -26,6 +27,11 @@ assert.equal(audit.findings.find((finding) => finding.id === "sitemap")?.status,
 assert.equal(audit.findings.find((finding) => finding.id === "social-cards")?.status, "good");
 assert.equal(audit.findings.find((finding) => finding.id === "redirects")?.status, "improvement");
 assert.equal(analyzePage(fixture.replace('<h2>Our process</h2>', '<h4>Our process</h4>'), "https://studio.com/").findings.find((finding) => finding.id === "outline")?.status, "improvement");
+assert.equal(analyzePage(fixture.replace('{"@type":"Organization","name":"Studio"}', '{invalid json}'), "https://studio.com/").findings.find((finding) => finding.id === "schema")?.status, "critical");
+const botRules = aiBotAccess('User-agent: *\nDisallow: /private\n\nUser-agent: GPTBot\nDisallow: /\n', 'https://studio.com/private/page');
+assert.equal(botRules.find(bot => bot.bot === 'GPTBot')?.state, 'blocked');
+assert.equal(botRules.find(bot => bot.bot === 'ClaudeBot')?.state, 'blocked');
+assert.equal(aiBotAccess(null, 'https://studio.com/')[0].state, 'unknown');
 assert.equal(audit.findings.find((finding) => finding.id === "repetition")?.status, "improvement");
 assert(!audit.keywords.some((keyword) => keyword.word === "excluded"));
 assert.deepEqual(discoverLinks(fixture, "https://studio.com/"), ["https://studio.com/about", "https://studio.com/missing"]);

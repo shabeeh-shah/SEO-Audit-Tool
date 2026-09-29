@@ -1,4 +1,5 @@
-// DNS preflight is defense in depth, not IP pinning. Deployments still require egress protection.
+// Use only Cloudflare Workers default public-only global fetch; never a private/VPC binding.
+// DNS preflight is defense in depth, not IP pinning. Other runtimes require egress protection.
 // Redirect destinations are revalidated.
 export function normalizeUrl(input: string): URL {
   if (typeof input !== 'string' || input.length > 2048 || !input.trim()) throw new Error('Enter a public website URL, such as https://example.com.');
@@ -51,4 +52,9 @@ export async function readHtml(response:Response){
   const decoder=new TextDecoder();let html='',bytes=0;
   try {while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>1_500_000)throw new Error('This page is too large for a quick audit (1.5 MB HTML limit). Try a smaller page.');html+=decoder.decode(value,{stream:true});}html+=decoder.decode();}finally{await reader.cancel().catch(()=>{});}
   return {html,bytes};
+}
+export async function readText(response:Response, limit=200_000){
+ const reader=response.body?.getReader();if(!reader)return '';
+ const decoder=new TextDecoder();let text='',bytes=0;
+ try {while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>limit)throw new Error('Response is too large to inspect.');text+=decoder.decode(value,{stream:true});}return text+decoder.decode();}finally{await reader.cancel().catch(()=>{});}
 }
