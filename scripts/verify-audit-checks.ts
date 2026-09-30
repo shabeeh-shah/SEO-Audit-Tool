@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import {analyzePage} from '../lib/audit/analyze';
+import {sampleAudit} from '../lib/audit/sample';
+import type {Audit, BotAccess, LinkResult} from '../lib/audit/types';
+import {auditUrl,goodPage,shortPage} from '../tests/fixtures/audit-pages';
+
+const allowedBots:BotAccess[]=['GPTBot','ClaudeBot','PerplexityBot','Google-Extended','CCBot'].map(bot=>({bot,state:'allowed',source:'*',rule:'No matching Allow or Disallow rule.'}));
+const baseOptions={links:[{url:'https://fixture.example/about',status:200,state:'ok',redirects:0}] as LinkResult[],redirects:0,robotsTxt:{url:'https://fixture.example/robots.txt',status:200,redirects:0},sitemapXml:{url:'https://fixture.example/sitemap.xml',status:200,redirects:0},llmsTxt:{url:'https://fixture.example/llms.txt',status:200,redirects:0},bots:allowedBots};
+const inspect=(html=goodPage,options:Partial<typeof baseOptions>={},url=auditUrl)=>analyzePage(html,url,{...baseOptions,...options});
+const status=(audit:Audit,id:string)=>audit.findings.find(f=>f.id===id)?.status;
+const expectStatus=(id:string,expected:'good'|'improvement'|'critical',html?:string,options?:Partial<typeof baseOptions>,url?:string)=>assert.equal(status(inspect(html,options,url),id),expected,id);
+
+const expectedIds=['title','description','h1','outline','alt','indexing','canonical','https','viewport','lang','links','redirects','robots-txt','sitemap','social-cards','ai-crawlers','llms-txt','copy','readability','repetition','paragraphs','text-access','sections','answers','schema','authorship','snippets'];
+const baseline=inspect();
+assert.equal(sampleAudit.sample,true,'the bundled sample report is static data and needs no fetch');
+assert.deepEqual(baseline.findings.map(f=>f.id).sort(),[...expectedIds].sort(),'fixture covers every audit check');
+for(const id of expectedIds)assert.equal(status(baseline,id),'good',`good fixture: ${id}`);
+
+expectStatus('title','critical',goodPage.replace(/<title>.*?<\/title>/,'<title></title>'));
+expectStatus('description','improvement',goodPage.replace(/<meta name="description"[^>]*>/,''));
+expectStatus('h1','improvement',goodPage.replace('<h1>Plan a more useful website</h1>','<h1>One</h1><h1>Two</h1>'));
+expectStatus('outline','improvement',goodPage.replace('<h2>How do planning teams use this audit?</h2>','<h4>How do planning teams use this audit?</h4>'));
+expectStatus('alt','improvement',goodPage.replace(' alt="Website planning diagram"',''));
+expectStatus('indexing','critical',goodPage.replace('</head>','<meta name="robots" content="noindex"></head>'));
+expectStatus('canonical','improvement',goodPage.replace(/<link rel="canonical"[^>]*>/,''));
+expectStatus('https','critical',goodPage,{},'http://fixture.example/');
+expectStatus('viewport','improvement',goodPage.replace(/<meta name="viewport"[^>]*>/,''));
+expectStatus('lang','improvement',goodPage.replace(' lang="en"',''));
+expectStatus('links','critical',goodPage,{links:[{url:'https://fixture.example/about',status:404,state:'broken',redirects:0}]});
+expectStatus('redirects','improvement',goodPage,{redirects:2});
+expectStatus('robots-txt','improvement',goodPage,{robotsTxt:{url:'https://fixture.example/robots.txt',status:404,redirects:0}});
+expectStatus('sitemap','improvement',goodPage,{sitemapXml:{url:'https://fixture.example/sitemap.xml',status:404,redirects:0}});
+expectStatus('social-cards','improvement',goodPage.replace(/<meta (property="og:[^"]+"|name="twitter:card")[^>]*>/g,''));
+expectStatus('ai-crawlers','improvement',goodPage,{bots:[{bot:'GPTBot',state:'blocked',source:'GPTBot',rule:'Disallow: /'}]});
+expectStatus('llms-txt','improvement',goodPage,{llmsTxt:{url:'https://fixture.example/llms.txt',status:404,redirects:0}});
+expectStatus('copy','improvement',shortPage);
+expectStatus('readability','improvement',shortPage);
+expectStatus('repetition','improvement',goodPage.replace('</main>',`<p>${'Repeat this useful sentence for the fixture test only. '.repeat(5)}</p></main>`));
+expectStatus('paragraphs','improvement',goodPage.replace('</main>',`<p>${'Helpful content gives readers a clear next step. '.repeat(30)}</p></main>`));
+expectStatus('text-access','improvement',shortPage);
+expectStatus('sections','improvement',goodPage.replace(/<h2>[^<]*<\/h2>/g,''));
+expectStatus('answers','improvement',goodPage.replace('How do planning teams use this audit?','The planning process'));
+expectStatus('schema','critical',goodPage.replace('{"@type":"Organization","name":"Fixture Studio","author":{"@type":"Person","name":"Avery"},"datePublished":"2026-01-15"}','{not valid json}'));
+expectStatus('authorship','improvement',goodPage.replace(/<meta name="author"[^>]*>|<meta property="article:published_time"[^>]*>|<time datetime="[^"]+">.*?<\/time>/g,'').replace('"author":{"@type":"Person","name":"Avery"},"datePublished":"2026-01-15"',''));
+expectStatus('snippets','improvement',goodPage.replace('</head>','<meta name="robots" content="nosnippet"></head>'));
+
+assert.equal(baseline.scores.seo,100,'good SEO checks score 100');
+assert.equal(baseline.scores.content,100,'good content checks score 100');
+assert.equal(baseline.scores.geo,100,'good AI/GEO checks score 100');
+assert.equal(baseline.score,100,'overall score averages the categories');
+const titleImprovement=inspect(goodPage.replace(/<title>.*?<\/title>/,'<title>Brief</title>'));
+assert.equal(titleImprovement.scores.seo,94,'a weighted Improvement contributes 55 points before rounding');
+console.log('Audit check fixtures passed.');

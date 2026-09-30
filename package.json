@@ -20,7 +20,7 @@
     "preview": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx scripts/verify-audit.ts"
+    "test": "node --import tsx scripts/verify-audit.ts && node --import tsx scripts/verify-audit-checks.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
