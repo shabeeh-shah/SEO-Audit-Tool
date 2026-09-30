@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://signal-audit-lab.shabeehshah42.chatgpt.site'),
   title: "Signal — Website Audit",
   description: "Find your next website improvement with an actionable SEO, content, and AI search readiness audit.",
   icons: {

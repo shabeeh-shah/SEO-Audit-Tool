@@ -1,0 +1,10 @@
+import {ImageResponse} from '@vercel/og';
+import {getSharedReport} from '@/lib/audit/reports';
+
+export const runtime='edge';
+const gradeFor=(score:number)=>score>=90?'A':score>=80?'B':score>=70?'C':score>=60?'D':'F';
+
+export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
+ const {id}=await params;const report=await getSharedReport(id);if(!report)return new Response('Report not found.',{status:404});const {audit}=report;const grade=gradeFor(audit.score);const hostname=new URL(audit.url).hostname;
+ return new ImageResponse(<div style={{height:'100%',width:'100%',display:'flex',background:'#f4f8f6',color:'#172a29',fontFamily:'Arial, sans-serif',padding:'64px',position:'relative'}}><div style={{display:'flex',flexDirection:'column',justifyContent:'space-between',width:'100%'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><div style={{fontSize:34,fontWeight:800,letterSpacing:-1}}>signal<span style={{color:'#2e7d6b'}}>.</span></div><div style={{fontSize:20,letterSpacing:3,color:'#6f817b'}}>WEBSITE AUDIT</div></div><div style={{display:'flex',alignItems:'center',gap:52}}><div style={{width:280,height:280,borderRadius:999,border:'18px solid #2e7d6b',background:'#fff',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}><div style={{fontSize:144,fontWeight:800,lineHeight:1,color:'#235a4e'}}>{grade}</div><div style={{fontSize:24,color:'#64766f'}}>{audit.score} / 100</div></div><div style={{display:'flex',flexDirection:'column',gap:14,maxWidth:650}}><div style={{fontSize:24,letterSpacing:3,color:'#6f817b'}}>OVERALL SCORE</div><div style={{fontSize:58,fontWeight:750,letterSpacing:-2,lineHeight:1.05}}>{hostname}</div><div style={{fontSize:28,color:'#60716b'}}>SEO · Content · AI search readiness</div></div></div><div style={{display:'flex',justifyContent:'space-between',fontSize:22,color:'#60716b'}}><span>Clear findings. Focused next steps.</span><span>signal audit</span></div></div></div>,{width:1200,height:630,headers:{'Cache-Control':'public, max-age=3600'}});
+}

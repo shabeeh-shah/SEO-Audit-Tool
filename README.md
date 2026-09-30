@@ -11,7 +11,8 @@ Signal audits one public website page and turns its HTML into practical SEO, con
 - **SEO foundations:** title, description, headings, alt attributes, HTTPS, canonical tags, language, viewport, indexing directives, and sampled internal links.
 - **Content quality:** extracted word count, English reading ease, long paragraphs, repeated sentences, and frequent on-page topics.
 - **AI/search readiness:** text availability, content structure, question-led sections, snippet controls, and structured-data opportunities.
-- **Actionable output:** weighted category scores, evidence for each finding, filters, a responsive interface, and a downloadable standalone HTML report.
+- **Actionable output:** weighted category scores, evidence for each finding, filters, a responsive interface, a print-ready PDF export, and an HTML download.
+- **Sharing and progress:** unlisted saved report links with score-based social previews, plus a comparison view when the same page is audited again in one session.
 
 ## Quick start
 
@@ -28,7 +29,7 @@ Open the local URL shown in your terminal. Run `npm run build` for a production 
 
 ## Standalone demo
 
-Open `demo.html` directly in any browser for a polished, no-install preview of the product. It uses fixed sample data and never sends a request to the entered URL. Use the live audit when you want to analyze a public website.
+Open `demo.html` directly in any browser for a polished, no-install preview of the product. It uses fixed sample data and never sends a request to the entered URL. Use the live audit when you want to analyze a public website. Saved share links require the live app’s database; the local demo shows a clear unavailable message instead.
 
 ## Commands
 
@@ -43,13 +44,13 @@ Open `demo.html` directly in any browser for a polished, no-install preview of t
 
 ## How audits work
 
-The app fetches one public HTML page, follows at most four redirects, and checks a focused sample of up to 8 eligible same-origin links. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, and AI/GEO category scores.
+The app fetches one public HTML page, follows at most three redirects, observes applicable `robots.txt` rules for SignalAudit, and checks a focused sample of up to 8 eligible same-origin links. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, and AI/GEO category scores.
 
 ## Scope and safety
 
-The audit does not execute audited-page JavaScript, crawl a full site, inspect `robots.txt`, measure Core Web Vitals, or determine actual search indexing, backlinks, traffic, or AI citations. Scores are useful checklists, not rankings or guarantees.
+The audit does not crawl a full site, reproduce a specific crawler, measure Core Web Vitals, or determine actual search indexing, backlinks, traffic, or AI citations. Scores are useful checklists, not rankings or guarantees.
 
-Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, and never forwards user credentials to audited sites.
+Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route blocks private and internal network targets, limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, uses a clear user agent, and never forwards user credentials to audited sites.
 
 ## Contributing
 
