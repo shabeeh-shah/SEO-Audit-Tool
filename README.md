@@ -11,7 +11,7 @@ Signal audits one public website page and turns its HTML into practical SEO, con
 - **SEO foundations:** title, description, headings, alt attributes, HTTPS, canonical tags, language, viewport, indexing directives, and sampled internal links.
 - **Content quality:** extracted word count, English reading ease, long paragraphs, repeated sentences, and frequent on-page topics.
 - **AI/search readiness:** text availability, content structure, question-led sections, snippet controls, and structured-data opportunities.
-- **Actionable output:** weighted category scores, evidence for each finding, filters, a responsive interface, clean PDF printing, shareable reports, and audit comparisons.
+- **Actionable output:** weighted category scores, evidence for each finding, and an action plan that explains why it matters, the exact change, and an example to adapt. It also surfaces keyword research prompts, internal-link next steps, readability guidance, and potential content gaps.
 
 ## Sample-report mode
 
