@@ -1,11 +1,12 @@
 import {createFetcher,FetchSafetyError,normalizeUrl,readHtml,readText} from '@/lib/audit/fetch';
-import {analyzePage,discoverLinks} from '@/lib/audit/analyze';
+import {analyzePage,discoverImages,discoverLinks} from '@/lib/audit/analyze';
 import {aiBotAccess,robotsAllows} from '@/lib/audit/robots';
-import type {LinkResult,ResourceCheck} from '@/lib/audit/types';
+import type {ImageAssetCheck,LinkResult,ResourceCheck} from '@/lib/audit/types';
 
 const LINK_SAMPLE_LIMIT=8;
 const LINK_CONCURRENCY=4;
 const LINK_TIMEOUT_MS=2_500;
+const IMAGE_SAMPLE_LIMIT=6;
 const RATE_WINDOW_MS=60_000;
 const RATE_MAX_AUDITS=5;
 const rateBuckets=new Map<string,{count:number;resetAt:number}>();
@@ -36,10 +37,12 @@ export async function POST(request:Request){
   if(/<title[^>]*>\s*(just a moment|access denied|attention required|verify you are human)/i.test(html))throw new Error('This site presented an access check instead of its page. Try another public page.');
   const checkResource=async(path:string):Promise<ResourceCheck>=>{const resourceUrl=new URL(path,finalUrl).href;try{const result=await fetchPage(resourceUrl,'GET',LINK_TIMEOUT_MS);const status=result.response.status;await result.response.body?.cancel();return {url:result.url,status,redirects:result.redirects};}catch{return {url:resourceUrl,status:null,redirects:0};}};
   const resourceChecks=Promise.all([checkResource('/sitemap.xml'),checkResource('/llms.txt')]);
+  const imageSample=discoverImages(html,finalUrl).slice(0,IMAGE_SAMPLE_LIMIT);const imageChecks:ImageAssetCheck[]=[];
+  for(const imageUrl of imageSample){try{const result=await fetchPage(imageUrl,'HEAD',LINK_TIMEOUT_MS);const status=result.response.status;const length=Number(result.response.headers.get('content-length'));await result.response.body?.cancel();const bytes=Number.isFinite(length)&&length>=0?length:null;imageChecks.push({url:imageUrl,status,bytes,state:status>=200&&status<400?bytes!==null&&bytes>300_000?'large':'ok':'unknown'});}catch{imageChecks.push({url:imageUrl,status:null,bytes:null,state:'unknown'});}}
   const sample=discoverLinks(html,finalUrl).filter(link=>robotsAllows(robots.body,link)!==false).slice(0,LINK_SAMPLE_LIMIT);const links:LinkResult[]=[];
   for(let i=0;i<sample.length;i+=LINK_CONCURRENCY){const batch=await Promise.all(sample.slice(i,i+LINK_CONCURRENCY).map(async link=>{try{let result=await fetchPage(link,'HEAD',LINK_TIMEOUT_MS);let response=result.response;if(response.status===405||response.status===501){await response.body?.cancel();result=await fetchPage(link,'GET',LINK_TIMEOUT_MS);response=result.response;}const status=response.status;await response.body?.cancel();return {url:link,status,state:status>=400&&status<600?'broken':status>=200&&status<300?'ok':'unknown',redirects:result.redirects} as LinkResult;}catch{return {url:link,status:null,state:'unknown',redirects:0} as LinkResult;}}));links.push(...batch);}
   const [sitemapXml,llmsTxt]=await resourceChecks;
-  return Response.json(analyzePage(html,finalUrl,{requestedUrl:url,responseMs,bytes,links,redirects:page.redirects,robotsTxt:robots.check,sitemapXml,llmsTxt,bots:aiBotAccess(robots.body,finalUrl),robotHeader:page.response.headers.get('x-robots-tag')||''}),{headers:{'Cache-Control':'no-store'}});
+  return Response.json(analyzePage(html,finalUrl,{requestedUrl:url,responseMs,bytes,links,images:imageChecks,redirects:page.redirects,robotsTxt:robots.check,sitemapXml,llmsTxt,bots:aiBotAccess(robots.body,finalUrl),robotHeader:page.response.headers.get('x-robots-tag')||''}),{headers:{'Cache-Control':'no-store'}});
  }catch(error){
   const message=error instanceof Error?error.message:'Unable to analyze this page.';
   const safe=error instanceof FetchSafetyError?error.message:/robots\.txt does not allow/i.test(message)?message:/too large|does not return an HTML|access check|returned HTTP|redirected more/i.test(message)?message:/timeout|abort/i.test(message)?'The website took too long to respond. Try again or audit a different page.':/fetch failed|network|connection/i.test(message)?'We could not reach this website. Check the URL or try another public page.':/Invalid URL/i.test(message)?'Enter a valid public website URL, such as https://example.com.':message;

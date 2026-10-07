@@ -2,7 +2,7 @@
 
 [![Verify](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml)
 
-Signal audits one public website page and turns its HTML into practical SEO, content, and AI/search-readiness recommendations.
+Signal audits one public website page and turns its HTML and isolated browser diagnostics into practical SEO, content, AI/search-readiness, performance, and mobile recommendations.
 
 [Live app](https://signal-audit-lab.shabeehshah42.chatgpt.site) · [Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
 
@@ -11,13 +11,12 @@ Signal audits one public website page and turns its HTML into practical SEO, con
 - **SEO foundations:** title, description, headings, alt attributes, HTTPS, canonical tags, language, viewport, indexing directives, and sampled internal links.
 - **Content quality:** extracted word count, English reading ease, long paragraphs, repeated sentences, and frequent on-page topics.
 - **AI/search readiness:** text availability, content structure, question-led sections, snippet controls, and structured-data opportunities.
+- **Performance and mobile:** initial HTML response, sampled image file sizes, render-blocking markup, responsive foundations, and a 390 px lab snapshot for LCP, CLS, FCP, load timing, horizontal overflow, tap targets, and oversized image dimensions.
 - **Actionable output:** weighted category scores, evidence for each finding, and an action plan that explains why it matters, the exact change, and an example to adapt. It also surfaces keyword research prompts, internal-link next steps, readability guidance, and potential content gaps.
 
 ## Sample-report mode
 
-Select **Preview offline sample** to open the built-in report. It uses fixed audit data already bundled with Signal and makes no network request, so it works offline and is safe for demos. **Run example.com audit** is different: it audits `example.com` and requires network access.
-
-For a no-install preview, open `demo.html` directly in a browser. It also uses fixed sample data and never sends a request to the entered URL. Saved share links require the live app's database; the local demo shows a clear unavailable message instead.
+Select **Preview sample** to open the built-in report. It uses fixed audit data already bundled with Signal and makes no network request, so it works offline and is safe for demos. **Run a safe test** is different: it audits `example.com` and requires network access.
 
 ## Checks and scoring
 
@@ -26,7 +25,7 @@ Signal reports a status for every check. A status is either **Good**, **Improvem
 ```text
 category score = round(sum(check weight × status points) / sum(check weights))
 status points: Good = 100, Improvement = 55, Critical = 0
-overall score = round((SEO + Content + AI/GEO) / 3)
+overall score = round((SEO + Content + AI/GEO + Performance) / 4)
 ```
 
 Checks with weight `0` are advisory. A link check with no conclusive response is also advisory, and readability is advisory when there is not enough declared-English prose to calculate it.
@@ -48,6 +47,11 @@ Checks with weight `0` are advisory. A link check with no conclusive response is
 | SEO | robots.txt | Successful response from `/robots.txt`; contents are not fully validated. | Advisory |
 | SEO | sitemap.xml | Successful response from `/sitemap.xml`; contents are not validated. | Advisory |
 | SEO | Social cards | Open Graph title, description, image, and Twitter card tags. | Advisory |
+| Performance | Initial page delivery | HTML response time and markup transfer size. | 2 |
+| Performance | Large images | Up to 6 image URLs with a reported `Content-Length` over 300 KB, plus oversized rendered dimensions in the lab snapshot. | 2 |
+| Performance | Bottlenecks | Potentially render-blocking scripts, stylesheet count, total scripts, and declared lazy loading. | 1 |
+| Performance | Mobile usability | Device-width viewport, large fixed inline widths, 390 px overflow, and small tap-target signals. | 1 |
+| Performance | Core Web Vitals | Isolated lab LCP and CLS diagnostics; FCP and load timing are also shown. INP and real-user field data are not simulated. | Advisory |
 | Content | Text volume | Extracted likely-main-content text, with a 100-word review threshold. | 1 |
 | Content | Reading ease | English Flesch reading-ease estimate when there are at least 100 words and 5 sentences. | 1 when scored |
 | Content | Repetition | Sentences of at least 8 words that appear 3 or more times. | 1 |
@@ -83,17 +87,16 @@ Open the local URL shown in your terminal. Run `npm run build` for a production 
 | `npm run dev` | Start local development. |
 | `npm run typecheck` | Validate TypeScript. |
 | `npm test` | Run audit parsing, safety, and export checks. |
-| `npm run preview` | Preview the production build locally. |
-| `npm run build` | Build the application. |
+| `npm run build` | Build the Cloudflare Worker and browser assets. |
 | `npm run lint` | Run ESLint. |
 
 ## How audits work
 
-The app fetches one public HTML page, follows at most three redirects, respects applicable `robots.txt` rules for SignalAudit, and checks up to 8 eligible same-origin links. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, and AI/GEO category scores.
+The app fetches one public HTML page, follows at most three redirects, respects applicable `robots.txt` rules for SignalAudit, checks up to 8 eligible same-origin links, samples up to 6 image headers, and loads an isolated 390 px browser preview. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, AI/GEO, and Performance.
 
 ## Scope and safety
 
-The audit does not crawl a full site, reproduce a specific crawler, measure Core Web Vitals, or determine actual search indexing, backlinks, traffic, or AI citations. Scores are useful checklists, not rankings or guarantees.
+The audit does not crawl a full site, reproduce a specific crawler, or determine actual search indexing, backlinks, traffic, or AI citations. LCP, CLS, FCP, and load timing come from one isolated lab run. They are not real-user field data, and INP is not simulated because it requires real interaction. Scores are useful checklists, not rankings or guarantees.
 
 Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, and never forwards user credentials to audited sites. The deployment targets Cloudflare Workers with public-only fetch and `global_fetch_strictly_public` enabled.
 
