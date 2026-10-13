@@ -1,5 +1,21 @@
 # Signal — Website Audit
 
+## Competitor & keyword insights
+
+Use **Competitor insights** in the sidebar to compare your page with one or two public competitor page URLs. An optional target phrase shows normalized exact-match counts in body text, title, and headings. The offline sample works without network access. Download comparison saves a standalone HTML report that can be printed to PDF; audit exports remain separate.
+
+- Keyword ideas: two- or three-word phrases from competitor headings, repeated at least twice on that competitor page and absent from your extracted text/title. Common words and domain tokens are excluded. These are research candidates, not search-volume or difficulty measurements.
+- Content gaps: competitor H2/H3 topics without a similar heading on your page (60% meaningful-token overlap). If related words already occur in your copy, the recommendation is to review structure rather than assume missing content. Suggestions include evidence links and a draft content brief.
+- Structure: compare H1/H2/H3 counts, question headings, lists, tables, word counts, and the actual heading outlines. Larger counts do not imply better quality.
+- Intent: a transparent English-language heuristic from title/heading phrases such as “how to,” “compare,” and “buy.” Ties are Mixed; no signals are Unclear. This does not inspect search results or infer actual visitor behavior.
+- Priority: High means evidence on both competitor pages; Medium means one. Comparison insights do not affect the audit score.
+
+Analysis excludes scripts, navigation, site-wide headers, footers, and explicitly hidden content; retains headers within main/article content; avoids counting nested text blocks twice; prefers main/article content; caps extracted text at 120,000 characters and headings at 100. Thin/truncated pages are flagged. It is a selected-page comparison, not a full-site content inventory, semantic-equivalence test, or guarantee of rankings/citations. Synonyms and non-English intent may be missed.
+
+The comparison endpoint uses the safe URL fetcher, checks robots.txt before every page redirect, limits redirects and response size, has a 40-second request deadline, permits up to two competitors, and allows three comparisons per IP per minute per Worker isolate. Missing robots.txt (404/410) permits access; blocked or unverifiable robots responses stop that page. One failed competitor is reported separately while successful results remain available. Rate limiting is in-memory per isolate, not a globally durable quota.
+
+`scripts/verify-competitors.ts` tests HTML fixtures, opportunity evidence, intent, phrase coverage, duplicate URLs, escaping, partial failures, redirect crawler rules, and rate limiting without network access.
+
 [![Verify](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml)
 
 Signal audits one public website page and turns its HTML and isolated browser diagnostics into practical SEO, content, AI/search-readiness, performance, and mobile recommendations.

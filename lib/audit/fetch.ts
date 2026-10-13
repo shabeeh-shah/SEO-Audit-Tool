@@ -33,7 +33,7 @@ export function publicAddress(address:string):boolean {
  return !(a===0||a===10||a===127||a>=224||(a===100&&b>=64&&b<=127)||(a===169&&b===254)||(a===172&&b>=16&&b<=31)||(a===192&&(b===0||b===2||b===31&&c===196||b===52&&c===193||b===88&&c===99||b===168||b===175&&c===48))||(a===198&&(b===18||b===19||b===51&&c===100))||(a===203&&b===0&&c===113));
 }
 
-export function createFetcher(){
+export function createFetcher(options:{beforeRequest?:(url:string)=>Promise<void>;signal?:AbortSignal}={}){
  const checked=new Map<string,Promise<void>>();
  async function checkHost(host:string){
   if(!checked.has(host))checked.set(host,(async()=>{
@@ -45,10 +45,10 @@ export function createFetcher(){
   await checked.get(host);
  }
  return async function safeFetch(input:string,method='GET',timeout=10_000){
-  let url=normalizeUrl(input);const signal=AbortSignal.timeout(Math.max(1_000,Math.min(timeout,15_000)));
+  let url=normalizeUrl(input);const deadline=AbortSignal.timeout(Math.max(1_000,Math.min(timeout,15_000)));const signal=options.signal?AbortSignal.any([options.signal,deadline]):deadline;
   for(let redirect=0;redirect<=MAX_REDIRECTS;redirect++){
    try{
-    await checkHost(url.hostname);if(signal.aborted)throw new FetchSafetyError('slow','The website took too long to respond. Please try again.');
+    await checkHost(url.hostname);await options.beforeRequest?.(url.href);if(signal.aborted)throw new FetchSafetyError('slow','The website took too long to respond. Please try again.');
     const response=await fetch(url.href,{method,redirect:'manual',signal,headers:{'User-Agent':AUDIT_USER_AGENT,'Accept':'text/html,application/xhtml+xml;q=0.9,text/plain;q=0.7,*/*;q=0.3','Accept-Language':'en-US,en;q=0.8'}});
     if([301,302,303,307,308].includes(response.status)){const destination=response.headers.get('location');await response.body?.cancel();if(!destination)throw new FetchSafetyError('unreachable','The website returned a redirect without a destination.');url=normalizeUrl(new URL(destination,url).href);continue;}
     return {response,url:url.href,redirects:redirect};
