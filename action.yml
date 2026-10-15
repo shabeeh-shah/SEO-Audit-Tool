@@ -1,0 +1,33 @@
+name: Signal audit
+description: Audit a public page and fail CI on configurable score regressions.
+inputs:
+  url:
+    description: Public page URL to audit
+    required: true
+  min-score:
+    description: Minimum acceptable score (0–100)
+    default: '0'
+  baseline:
+    description: Optional previous JSON report path
+    default: ''
+  max-drop:
+    description: Maximum allowed score decrease from baseline
+    default: '100'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Audit public page
+      shell: bash
+      env:
+        SIGNAL_ACTION_PATH: ${{ github.action_path }}
+        SIGNAL_URL: ${{ inputs.url }}
+        SIGNAL_MIN_SCORE: ${{ inputs.min-score }}
+        SIGNAL_BASELINE: ${{ inputs.baseline }}
+        SIGNAL_MAX_DROP: ${{ inputs.max-drop }}
+      run: |
+        args=("$SIGNAL_URL" --min-score "$SIGNAL_MIN_SCORE" --max-drop "$SIGNAL_MAX_DROP" --output signal-audit.json)
+        if [ -n "$SIGNAL_BASELINE" ]; then args+=(--baseline "$SIGNAL_BASELINE"); fi
+        node "$SIGNAL_ACTION_PATH/packages/cli/bin/signal-audit.mjs" "${args[@]}"

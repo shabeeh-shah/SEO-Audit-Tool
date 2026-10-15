@@ -9,13 +9,13 @@ type AnalyzeOptions=NonNullable<Parameters<typeof analyzePage>[2]>;
 const baseOptions:AnalyzeOptions={links:[{url:'https://fixture.example/about',status:200,state:'ok',redirects:0}] as LinkResult[],images:[{url:'https://fixture.example/diagram.png',status:200,bytes:120000,state:'ok'}],responseMs:350,bytes:48000,redirects:0,robotsTxt:{url:'https://fixture.example/robots.txt',status:200,redirects:0},sitemapXml:{url:'https://fixture.example/sitemap.xml',status:200,redirects:0},llmsTxt:{url:'https://fixture.example/llms.txt',status:200,redirects:0},bots:allowedBots};
 const inspect=(html=goodPage,options:Partial<AnalyzeOptions>={},url=auditUrl)=>analyzePage(html,url,{...baseOptions,...options});
 const status=(audit:Audit,id:string)=>audit.findings.find(f=>f.id===id)?.status;
-const expectStatus=(id:string,expected:'good'|'improvement'|'critical',html?:string,options?:Partial<AnalyzeOptions>,url?:string)=>assert.equal(status(inspect(html,options,url),id),expected,id);
+const expectStatus=(id:string,expected:'good'|'improvement'|'critical'|'optional',html?:string,options?:Partial<AnalyzeOptions>,url?:string)=>assert.equal(status(inspect(html,options,url),id),expected,id);
 
-const expectedIds=['title','description','h1','outline','alt','indexing','canonical','https','viewport','lang','links','redirects','robots-txt','sitemap','social-cards','page-speed','large-images','performance-bottlenecks','mobile-usability','core-web-vitals','ai-crawlers','llms-txt','copy','readability','repetition','paragraphs','text-access','sections','answers','schema','authorship','snippets'];
+const expectedIds=['title','description','h1','outline','alt','indexing','canonical','https','viewport','lang','links','redirects','robots-txt','sitemap','social-cards','page-speed','large-images','performance-bottlenecks','mobile-usability','core-web-vitals','ai-crawlers','llms-txt','copy','readability','repetition','paragraphs','text-access','sections','answers','schema','authorship','snippets','security-headers','hreflang'];
 const baseline=inspect();
 assert.equal(sampleAudit.sample,true,'the bundled sample report is static data and needs no fetch');
 assert.deepEqual(baseline.findings.map(f=>f.id).sort(),[...expectedIds].sort(),'fixture covers every audit check');
-for(const id of expectedIds.filter(id=>id!=='core-web-vitals'))assert.equal(status(baseline,id),'good',`good fixture: ${id}`);
+for(const id of expectedIds.filter(id=>!['core-web-vitals','llms-txt','security-headers','hreflang'].includes(id)))assert.equal(status(baseline,id),'good',`good fixture: ${id}`);
 assert.equal(status(baseline,'core-web-vitals'),'improvement','Core Web Vitals requests lab and field confirmation');
 
 expectStatus('title','critical',goodPage.replace(/<title>.*?<\/title>/,'<title></title>'));
@@ -38,7 +38,7 @@ expectStatus('large-images','critical',goodPage,{images:[{url:'https://fixture.e
 expectStatus('performance-bottlenecks','improvement',goodPage.replace('</head>','<script src="/blocking.js"></script></head>'));
 expectStatus('mobile-usability','improvement',goodPage.replace(/<meta name="viewport"[^>]*>/,''));
 expectStatus('ai-crawlers','improvement',goodPage,{bots:[{bot:'GPTBot',state:'blocked',source:'GPTBot',rule:'Disallow: /'}]});
-expectStatus('llms-txt','improvement',goodPage,{llmsTxt:{url:'https://fixture.example/llms.txt',status:404,redirects:0}});
+expectStatus('llms-txt','optional',goodPage,{llmsTxt:{url:'https://fixture.example/llms.txt',status:404,redirects:0}});
 expectStatus('copy','improvement',shortPage);
 expectStatus('readability','improvement',shortPage);
 expectStatus('repetition','improvement',goodPage.replace('</main>',`<p>${'Repeat this useful sentence for the fixture test only. '.repeat(5)}</p></main>`));

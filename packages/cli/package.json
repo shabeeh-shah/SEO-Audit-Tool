@@ -1,0 +1,11 @@
+{
+  "name": "signal-audit",
+  "version": "0.1.0",
+  "description": "Evidence-based SEO and AI search readiness checks for public pages and CI.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {"signal-audit": "bin/signal-audit.mjs"},
+  "files": ["bin", "sample.json", "README.md", "LICENSE"],
+  "engines": {"node": ">=22.13.0"},
+  "repository": {"type":"git","url":"https://github.com/shabeeh-shah/SEO-Audit-Tool.git","directory":"packages/cli"}
+}

@@ -5,4 +5,6 @@ export default defineConfig({
     port: 5173,
   },
   plugins: [vinext()],
+  ssr: { external: ["cloudflare:workers"] },
+  build: { rolldownOptions: { external: ["cloudflare:workers"] } },
 });

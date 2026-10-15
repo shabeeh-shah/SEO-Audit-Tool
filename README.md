@@ -1,42 +1,57 @@
-# Signal — Website Audit
+# Signal — SEO & AI Search Readiness
 
-## Competitor & keyword insights
+Can AI crawlers access your content? Signal turns public-page evidence into clear priorities and editable fixes.
 
-Use **Competitor insights** in the sidebar to compare your page with one or two public competitor page URLs. An optional target phrase shows normalized exact-match counts in body text, title, and headings. The offline sample works without network access. Download comparison saves a standalone HTML report that can be printed to PDF; audit exports remain separate.
+[**Try the live app**](https://signal-audit-lab.shabeehshah42.chatgpt.site) · [**Download source**](https://github.com/shabeeh-shah/SEO-Audit-Tool/archive/refs/heads/main.zip) · [Releases](https://github.com/shabeeh-shah/SEO-Audit-Tool/releases) · [Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
 
-- Keyword ideas: two- or three-word phrases from competitor headings, repeated at least twice on that competitor page and absent from your extracted text/title. Common words and domain tokens are excluded. These are research candidates, not search-volume or difficulty measurements.
-- Content gaps: competitor H2/H3 topics without a similar heading on your page (60% meaningful-token overlap). If related words already occur in your copy, the recommendation is to review structure rather than assume missing content. Suggestions include evidence links and a draft content brief.
-- Structure: compare H1/H2/H3 counts, question headings, lists, tables, word counts, and the actual heading outlines. Larger counts do not imply better quality.
-- Intent: a transparent English-language heuristic from title/heading phrases such as “how to,” “compare,” and “buy.” Ties are Mixed; no signals are Unclear. This does not inspect search results or infer actual visitor behavior.
-- Priority: High means evidence on both competitor pages; Medium means one. Comparison insights do not affect the audit score.
+![Signal dashboard showing audit grades, evidence, and actionable recommendations](docs/signal-dashboard.jpg)
 
-Analysis excludes scripts, navigation, site-wide headers, footers, and explicitly hidden content; retains headers within main/article content; avoids counting nested text blocks twice; prefers main/article content; caps extracted text at 120,000 characters and headings at 100. Thin/truncated pages are flagged. It is a selected-page comparison, not a full-site content inventory, semantic-equivalence test, or guarantee of rankings/citations. Synonyms and non-English intent may be missed.
+[![Verify](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml) · **MIT license** · **Public beta v0.1.0**
 
-The comparison endpoint uses the safe URL fetcher, checks robots.txt before every page redirect, limits redirects and response size, has a 40-second request deadline, permits up to two competitors, and allows three comparisons per IP per minute per Worker isolate. Missing robots.txt (404/410) permits access; blocked or unverifiable robots responses stop that page. One failed competitor is reported separately while successful results remain available. Rate limiting is in-memory per isolate, not a globally durable quota.
+## What works today
 
-`scripts/verify-competitors.ts` tests HTML fixtures, opportunity evidence, intent, phrase coverage, duplicate URLs, escaping, partial failures, redirect crawler rules, and rate limiting without network access.
+- **SEO and content:** titles, descriptions, headings, canonical/indexing directives, language, viewport, social cards, image alt attributes, readability, and repeated copy.
+- **AI readiness:** robots.txt rules for GPTBot, ClaudeBot, PerplexityBot, Google-Extended, and CCBot; JSON-LD syntax/types; question-and-answer structure; author/date signals. These agents have different purposes; this is not a complete list of AI search agents. `llms.txt` is explicitly optional and unscored.
+- **Performance:** server HTML delivery, image header samples, and an experimental 390 px sandboxed browser preview that **executes page JavaScript** and attempts rendered word count, LCP/CLS/FCP, overflow, and tap-target diagnostics. axe-core checks the preview for selected WCAG A/AA violations. This is **not Lighthouse**, a compliance audit, or real-user Core Web Vitals.
+- **Site discovery:** a separate, bounded crawl follows same-origin sitemap entries and links for up to 25 pages. It checks HTTP failures, redirects, duplicate titles, canonical conflicts, and hreflang return links among sampled pages. It reports partial coverage and never claims a full-site inventory.
+- **Competitor insights:** compare one page with up to two competitors for recurring phrase ideas, heading gaps, structure, and estimated search intent. No search-volume, ranking, difficulty, or semantic-equivalence data.
+- **Act on the results:** impact/effort sorting, copyable Organization JSON-LD, AI-bot robots rules, and editable meta descriptions. Drafts must match the actual business and publishing policy.
+- **Keep and share:** public report permalinks, score preview images, print-to-PDF, HTML/JSON/CSV exports, and the last 10 audits saved in this browser with score/finding comparisons. Clear history removes local history; shared links are separate snapshots.
 
-[![Verify](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/shabeeh-shah/SEO-Audit-Tool/actions/workflows/ci.yml)
+## Honest limits
 
-Signal audits one public website page and turns its HTML and isolated browser diagnostics into practical SEO, content, AI/search-readiness, performance, and mobile recommendations.
+**Free public beta:** quick audits inspect one HTML page, up to 8 links, and up to 6 image headers. Optional discovery inspects up to 25 pages in 40 seconds, with up to 3 sitemap files (200 KB each), same-origin URLs, and 3 parallel page requests. HTML is capped at 1.5 MB, redirects at 3, and individual fetches at 15 seconds. Blocked and timed-out pages are reported as unavailable, not as broken links.
 
-[Live app](https://signal-audit-lab.shabeehshah42.chatgpt.site) · [Report a bug](https://github.com/shabeeh-shah/SEO-Audit-Tool/issues)
+The preview can differ substantially from the original site because of sandboxing, cookies, cross-origin resources, and script restrictions. Its CLS is a simple accumulated diagnostic, not the official session-window calculation. INP is not simulated. Unsupported metrics remain unavailable. Automated accessibility checks do not replace manual keyboard, screen-reader, or visual testing.
 
-## Features
+**Real field data** uses a separate Chrome UX Report API request: mobile, page-level p75 LCP/INP/CLS with its collection period. Configure server-only `CRUX_API_KEY` to enable it. Without a key, or when CrUX has insufficient coverage, Signal displays an explicit unavailable state and a PageSpeed Insights link. Field data never changes the heuristic score. Do not put API keys in client code.
 
-- **SEO foundations:** title, description, headings, alt attributes, HTTPS, canonical tags, language, viewport, indexing directives, and sampled internal links.
-- **Content quality:** extracted word count, English reading ease, long paragraphs, repeated sentences, and frequent on-page topics.
-- **AI/search readiness:** text availability, content structure, question-led sections, snippet controls, and structured-data opportunities.
-- **Performance and mobile:** initial HTML response, sampled image file sizes, render-blocking markup, responsive foundations, and a 390 px lab snapshot for LCP, CLS, FCP, load timing, horizontal overflow, tap targets, and oversized image dimensions.
-- **Actionable output:** weighted category scores, evidence for each finding, and an action plan that explains why it matters, the exact change, and an example to adapt. It also surfaces keyword research prompts, internal-link next steps, readability guidance, and potential content gaps.
+Rate limits are in-memory, per IP/server instance: 5 audits, 3 comparisons, 1 discovery crawl, 1 field lookup, and 10 share operations per minute. They are not durable account quotas. Only public HTTP(S) domains are allowed. Local/private addresses, credentials, and custom ports are rejected. DNS is checked, redirects are revalidated, and crawler rules are checked before page fetches. Hosted Workers additionally enforce public-only egress. DNS checking alone is not a complete rebinding defense on an arbitrary Node host; keep the Worker egress guard when hosting the server.
 
-## Sample-report mode
+No score guarantees indexing, rankings, traffic, crawler visits, or AI citations. [Google says special AI text files are not required for its AI search features](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide).
 
-Select **Preview sample** to open the built-in report. It uses fixed audit data already bundled with Signal and makes no network request, so it works offline and is safe for demos. **Run a safe test** is different: it audits `example.com` and requires network access.
+## Start locally
+
+Requires Node.js 22.13+.
+
+```sh
+git clone https://github.com/shabeeh-shah/SEO-Audit-Tool.git
+cd SEO-Audit-Tool
+npm ci
+npm run dev
+```
+
+Open the URL printed by the development server. **Preview offline sample** and **Explore sample comparison** use bundled fictional data with no audit network request. To run the entire app without any internet, install dependencies first and serve the local build. The standalone `demo.html` remains a lightweight visual demo rather than the full live engine.
+
+```sh
+npm run typecheck
+npm test
+npm run build
+```
 
 ## Checks and scoring
 
-Signal reports a status for every check. A status is either **Good**, **Improvement**, or **Critical**. Some checks are advisory: they still show evidence and a next step, but are not used in the numeric score.
+Signal reports a status for every check. A status is **Good**, **Improvement**, **Critical**, or **Optional**. Optional findings never reduce the score or enter the top-fix list. Some checks are advisory: they still show evidence and a next step, but are not used in the numeric score.
 
 ```text
 category score = round(sum(check weight × status points) / sum(check weights))
@@ -48,7 +63,7 @@ Checks with weight `0` are advisory. A link check with no conclusive response is
 
 | Category | Check | What it reviews | Weight |
 | --- | --- | --- | ---: |
-| SEO | Title | A non-empty, single title tag; 20–65 characters is a review guide. Site-wide uniqueness needs a crawl and is not claimed. | 2 |
+| SEO | Title | A non-empty, single title tag; 20–65 characters is a review guide. Duplicates are checked separately among pages in the bounded discovery crawl. | 2 |
 | SEO | Meta description | A non-empty, single page description; 70–170 characters is a review guide. | 1 |
 | SEO | H1 | One non-empty main heading. | 1 |
 | SEO | Heading outline | Heading-level jumps such as H1 to H3. | 1 |
@@ -63,6 +78,8 @@ Checks with weight `0` are advisory. A link check with no conclusive response is
 | SEO | robots.txt | Successful response from `/robots.txt`; contents are not fully validated. | Advisory |
 | SEO | sitemap.xml | Successful response from `/sitemap.xml`; contents are not validated. | Advisory |
 | SEO | Social cards | Open Graph title, description, image, and Twitter card tags. | Advisory |
+| SEO | Security headers | Presence of CSP, nosniff, referrer policy, and HTTPS HSTS; policy effectiveness is not validated. | Advisory |
+| SEO | hreflang | URL and language-code shape; reciprocal checks only within the separate crawl. | Advisory |
 | Performance | Initial page delivery | HTML response time and markup transfer size. | 2 |
 | Performance | Large images | Up to 6 image URLs with a reported `Content-Length` over 300 KB, plus oversized rendered dimensions in the lab snapshot. | 2 |
 | Performance | Bottlenecks | Potentially render-blocking scripts, stylesheet count, total scripts, and declared lazy loading. | 1 |
@@ -79,52 +96,63 @@ Checks with weight `0` are advisory. A link check with no conclusive response is
 | AI/GEO | Author and date | Author and publication/update signals in visible markup, metadata, or JSON-LD. | Advisory |
 | AI/GEO | Snippet controls | `nosnippet` or `max-snippet:0` directives. | 1 |
 | AI/GEO | AI crawler access | Basic robots.txt rules for GPTBot, ClaudeBot, PerplexityBot, Google-Extended, and CCBot. | Advisory |
-| AI/GEO | llms.txt | Successful response from `/llms.txt`; it is an emerging convention. | Advisory |
+| AI/GEO | llms.txt | Optional file availability, whether present or absent. No action is required. | Advisory |
 
 The crawler, schema, answer, authorship, llms.txt, and social checks are useful structure signals. They do not guarantee indexing, AI visibility, or citations.
 
-## Quick start
+## Distribution and automation
 
-**Requirements:** Node.js 22.13 or later.
+### CLI
+
+The CLI source is ready, but **has not been published to npm**. Do not assume a public package with the same name belongs to this project.
 
 ```sh
-git clone https://github.com/shabeeh-shah/SEO-Audit-Tool.git
-cd SEO-Audit-Tool
-npm ci
-npm run dev
+node packages/cli/bin/signal-audit.mjs --sample
+node packages/cli/bin/signal-audit.mjs https://your-public-site.com --output report.json
+node packages/cli/bin/signal-audit.mjs https://your-public-site.com --baseline report.json --max-drop 5 --min-score 70
+npm pack ./packages/cli --ignore-scripts
 ```
 
-Open the local URL shown in your terminal. Run `npm run build` for a production build.
+Install the resulting tarball locally to use `signal-audit` / `npx --no-install signal-audit`. Live CLI calls send the URL to the public Signal service and use the server HTML checks. They do not execute the browser preview. [CLI options and exit codes](packages/cli/README.md).
 
-## Commands
+### GitHub Action
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start local development. |
-| `npm run typecheck` | Validate TypeScript. |
-| `npm test` | Run audit parsing, safety, and export checks. |
-| `npm run build` | Build the Cloudflare Worker and browser assets. |
-| `npm run lint` | Run ESLint. |
+After this revision is pushed, use this repository as a composite action; pin a reviewed commit for production. Example after the v0.1.0 tag is published:
 
-## How audits work
+```yaml
+- uses: actions/checkout@v4
+- uses: shabeeh-shah/SEO-Audit-Tool@v0.1.0
+  with:
+    url: https://your-public-site.com
+    min-score: '70'
+    baseline: previous-report.json
+    max-drop: '5'
+```
 
-The app fetches one public HTML page, follows at most three redirects, respects applicable `robots.txt` rules for SignalAudit, checks up to 8 eligible same-origin links, samples up to 6 image headers, and loads an isolated 390 px browser preview. Each scored check is weighted: Good = 100, Improvement = 55, Critical = 0. Optional opportunities and unavailable checks are excluded. The overall score is the average of SEO, Content, AI/GEO, and Performance.
+Omit `baseline` if you have no previous report. The action writes `signal-audit.json`; upload it with your workflow’s artifact step if desired. Network failure exits 2; threshold failure exits 1. Public service rate limits and availability apply.
 
-## Scope and safety
+### Chrome extension
 
-The audit does not crawl a full site, reproduce a specific crawler, or determine actual search indexing, backlinks, traffic, or AI citations. LCP, CLS, FCP, and load timing come from one isolated lab run. They are not real-user field data, and INP is not simulated because it requires real interaction. Scores are useful checklists, not rankings or guarantees.
+[Load the unpacked extension](extension/README.md) to inspect the active page’s rendered HTML locally. It uses `activeTab` and `scripting`, with no persistent access to all sites. Opening a full public audit shares only the URL with Signal and requires a separate Run audit click. **No Chrome Web Store listing has been published.**
 
-Only public HTTP(S) URLs without custom ports or credentials are accepted. The audit route limits request and response sizes, rechecks redirects, bounds timeouts and link concurrency, and never forwards user credentials to audited sites. The deployment targets Cloudflare Workers with public-only fetch and `global_fetch_strictly_public` enabled.
+### MCP
 
-## Contributing
+The hosted app exposes a stateless JSON-response MCP endpoint at `/mcp`, with `audit_public_page` and `sample_audit`. It supports initialization, tool discovery, calls, and ping using protocol version 2025-06-18. GET streams and server-pushed notifications are not supported. The tool audits public pages only; output text is untrusted site data. Existing URL safety and audit rate limits apply. The browser’s WebMCP tool remains separate from this server endpoint. Sites manages its hosted MCP connection; connection testing is separate from deployment.
 
-1. Create a branch from `main`.
-2. Make a focused change with clear, user-facing behavior.
-3. Run `npm run typecheck`, `npm test`, and `npm run build`.
-4. Open a pull request describing the change and validation.
+## Competitor methodology
 
-Please do not open a public issue with a possible security vulnerability. Contact the repository owner privately instead.
+Two- and three-word phrases must occur at least twice on a compared page and in a heading, and be absent from your extracted title/text. Heading gaps use 60% meaningful-token overlap; synonyms can be missed. Intent is an English title/heading phrase heuristic, not a search-results analysis. High priority means evidence on both compared pages; Medium means one. These suggestions never change the audit grade. Analysis is capped at 120,000 extracted characters and 100 headings; thin/truncated content is flagged. Comparison reports download separately.
 
-## License
+## Prioritization
 
-No license has been selected yet. Choose a license before accepting external contributions or allowing reuse.
+Impact and effort are editorial estimates, not measured traffic gains or completion times. Critical = impact 3; other issues with weight ≥2 = impact 2; remaining issues = impact 1. Tag/metadata fixes have effort 1, copy/schema/server-delivery/bundle work effort 3, and other checks effort 2. Default ordering uses impact ÷ effort, then severity and score weight. Optional findings do not enter the top three fixes. Severity sorting is also available.
+
+## Configuration and release
+
+The current hostname is intentionally retained. When moving domains, update `lib/site.ts`, layout metadata base, CLI default, extension URL, User-Agent URL, and documentation together. Configure `CRUX_API_KEY` only in the server secret store. Shared reports require the existing D1 database binding and schema; browser history and downloads do not.
+
+[Release notes](CHANGELOG.md) · [Release checklist](docs/release.md). No stars, forks, ratings, or usage numbers are invented. Stars and forks are community actions, not product settings.
+
+## Contributing and license
+
+Open a focused pull request with tests and the relevant typecheck/build results. Report security issues privately to the repository owner, not in public issues. Signal’s source is [MIT licensed](LICENSE). Third-party packages keep their own licenses; vendored axe-core is MPL-2.0, with its license in `public/vendor/AXE-LICENSE.txt`.

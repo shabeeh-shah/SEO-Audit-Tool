@@ -1,10 +1,10 @@
 export type Category = 'seo' | 'content' | 'geo' | 'performance';
-export type Status = 'critical' | 'improvement' | 'good';
+export type Status = 'critical' | 'improvement' | 'good' | 'optional';
 export type Finding = { id: string; category: Category; status: Status; title: string; evidence: string; recommendation: string; weight: number; };
 export type LinkResult = { url: string; status: number | null; state: 'ok' | 'broken' | 'unknown'; redirects: number };
 export type ResourceCheck = { url: string; status: number | null; redirects: number };
 export type ImageAssetCheck = { url: string; status: number | null; bytes: number | null; state: 'ok' | 'large' | 'unknown' };
-export type LabPerformance = { renderedWords: number; fcpMs: number | null; lcpMs: number | null; cls: number | null; loadMs: number | null; ttfbMs: number | null; longTasks: number; transferKb: number | null; mobileOverflow: boolean; smallTapTargets: number; oversizedImages: {url:string;width:number;height:number;displayWidth:number;displayHeight:number}[] };
+export type LabPerformance = { accessibility?:{violations:{id:string;impact:string|null;help:string;url:string;count:number}[];incomplete:number}|null; renderedWords: number; fcpMs: number | null; lcpMs: number | null; cls: number | null; loadMs: number | null; ttfbMs: number | null; longTasks: number; transferKb: number | null; mobileOverflow: boolean; smallTapTargets: number; oversizedImages: {url:string;width:number;height:number;displayWidth:number;displayHeight:number}[] };
 export type BotAccess = { bot: string; state: 'allowed' | 'blocked' | 'unknown'; source: string; rule: string };
 export type PagePreview = { image: string | null; favicon: string | null; headline: string; };
 export type Audit = {

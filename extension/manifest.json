@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "Signal — Page Audit",
+  "version": "0.1.0",
+  "description": "Check the current page locally and open Signal for a public SEO and AI readiness audit.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {"default_title":"Audit with Signal","default_popup":"popup.html"}
+}
