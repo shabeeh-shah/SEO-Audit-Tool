@@ -68,7 +68,7 @@ overall score = round((SEO + Content + AI/GEO + Performance) / 4)
 
 Checks with weight `0` are advisory. Optional findings, including llms.txt, never reduce the score or enter the top-fix list. A link result with no conclusive response is advisory, and readability is advisory when the page does not provide enough declared-English prose. Historical reports store the scoring version and warn when compared runs use different scored checks.
 
-The score summarizes this documented ruleset. It does not predict or guarantee indexing, rankings, traffic, crawler visits, AI visibility, or AI citations. The detailed check weights and thresholds live in [`lib/audit/analyze.ts`](lib/audit/analyze.ts), and the verification fixtures live in [`scripts/`](scripts/).
+The score summarizes this documented ruleset. It does not predict or guarantee indexing, rankings, traffic, crawler visits, AI visibility, or AI citations. Every check’s category, label, and weight lives in the single scoring configuration at [`lib/audit/scoring.ts`](lib/audit/scoring.ts); observed thresholds and evidence live in [`lib/audit/analyze.ts`](lib/audit/analyze.ts), and the verification fixtures live in [`scripts/`](scripts/).
 
 ## Limitations
 
