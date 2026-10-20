@@ -16,7 +16,7 @@ Can AI crawlers access your content? Signal turns public-page evidence into clea
 - **Site discovery:** a separate, bounded crawl follows same-origin sitemap entries and links for up to 25 pages. It checks HTTP failures, redirects, duplicate titles, canonical conflicts, and hreflang return links among sampled pages. It reports partial coverage and never claims a full-site inventory.
 - **Competitor insights:** compare one page with up to two competitors for recurring phrase ideas, heading gaps, structure, and estimated search intent. No search-volume, ranking, difficulty, or semantic-equivalence data.
 - **Act on the results:** impact/effort sorting, copyable Organization JSON-LD, AI-bot robots rules, and editable meta descriptions. Drafts must match the actual business and publishing policy.
-- **Keep and share:** public report permalinks, score preview images, print-to-PDF, HTML/JSON/CSV exports, and the last 10 audits saved in this browser with score/finding comparisons. Clear history removes local history; shared links are separate snapshots.
+- **Keep and share:** public report permalinks, score preview images, print-to-PDF, HTML/JSON/CSV exports, and up to 100 audits (3 MB) saved in this browser with page-specific score trends, dated snapshots, and comparisons between any two runs. Clear history removes local history; shared links are separate snapshots.
 
 ## Honest limits
 
@@ -156,3 +156,18 @@ The current hostname is intentionally retained. When moving domains, update `lib
 ## Contributing and license
 
 Open a focused pull request with tests and the relevant typecheck/build results. Report security issues privately to the repository owner, not in public issues. Signal’s source is [MIT licensed](LICENSE). Third-party packages keep their own licenses; vendored axe-core is MPL-2.0, with its license in `public/vendor/AXE-LICENSE.txt`.
+
+## Historical audit tracking
+
+Open **Audit history** in the sidebar. Every successful live page audit is saved with its timestamp, overall/category scores, findings, and available lab measurements. Later lab messages update that same run rather than creating duplicates. Failed, cancelled, and sample audits are not saved. Existing browser history is retained.
+
+- Select an exact page URL to see its trend chart and dated run table. URL fragments are ignored; paths, query strings, HTTP/HTTPS, and trailing slashes remain distinct.
+- Compare a result with any earlier run of that page. Review category deltas, resolved/new issues, and improved/worsened priorities. Missing or optional checks are excluded from issue-change counts, never treated as fixes.
+- A scoring-version or scored-check difference produces a comparability warning. Scores remain heuristic; faster delivery or different crawl coverage can affect them without a content change.
+- Opening a saved snapshot does not start a fresh audit or sandbox measurement, overwrite it, or change its date. **Re-audit this page** starts a new run explicitly.
+- The chart spaces points by run, not elapsed time; exact timestamps and values remain accessible in the table. **Explore history demo** uses fictional data without saving it or making audit requests.
+- **Export history JSON** downloads an archive of all saved reports. This version provides backup export, not an import/restore interface. **Clear saved history** asks for confirmation; shared public links remain separate.
+
+Storage is local to the browser/profile and origin, with a cap of 100 runs and 3 MB of serialized UTF-8 data. Oldest runs are removed when either cap is reached, with a visible notice. Private browsing, browser cleanup, and changing domains/devices can remove or hide this history. Storage failures are surfaced, not silently reported as saved. There is no account sync, scheduled monitoring, or server-side private history.
+
+`npm test` includes history migration/validation, retention, deduplication, grouping, earlier-run selection, sample exclusion, and comparison tests.

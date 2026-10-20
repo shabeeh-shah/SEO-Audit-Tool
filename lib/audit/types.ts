@@ -8,7 +8,7 @@ export type LabPerformance = { accessibility?:{violations:{id:string;impact:stri
 export type BotAccess = { bot: string; state: 'allowed' | 'blocked' | 'unknown'; source: string; rule: string };
 export type PagePreview = { image: string | null; favicon: string | null; headline: string; };
 export type Audit = {
-  url: string; requestedUrl: string; title: string; description: string; date: string; sample?: boolean;
+  url: string; requestedUrl: string; title: string; description: string; date: string; sample?: boolean; scoringVersion?: string;
   scores: Record<Category, number>; score: number; findings: Finding[];
   metrics: { words: number; rawHtmlWords: number; scriptCount: number; readingEase: number | null; headings: number; h1: number; h2: number; images: number; missingAlt: number; links: number; checkedLinks: number; responseMs: number; htmlKb: number; schemaTypes: string[]; redirects: number; robotsTxt: ResourceCheck; sitemapXml: ResourceCheck; };
   keywords: { word: string; count: number; density: number }[]; headings: { level: number; text: string }[]; linkResults: LinkResult[]; limitations: string[];

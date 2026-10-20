@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — historical audit tracking
+
+- Added per-page history, category score trends, and arbitrary earlier-run comparisons.
+- Saved reports reopen as snapshots without rerunning browser measurements.
+- Retained existing history, expanded local retention to 100 runs / 3 MB, added backup export and an offline history demo.
+- Added validation, storage warnings, and scoring-coverage warnings.
+
+
 ## 0.1.0 — 2026-10-14
 
 Initial documented public beta. This tag identifies a release of the accumulated app, not a claim of production-grade crawling coverage.
