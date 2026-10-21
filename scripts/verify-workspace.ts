@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {workspaceNav,viewFromPath,viewHref,issueBadge} from '../lib/workspace-nav';
+import {sampleAudit} from '../lib/audit/sample';
+assert.equal(new Set(workspaceNav.map(item=>item.route)).size,workspaceNav.length);
+for(const item of workspaceNav)assert.equal(viewFromPath(item.route),item.id);
+assert.equal(viewFromPath('/report/not-a-view'),'overview');
+const link=new URL(viewHref('recommendations','https://example.com/?a=1&b=2','schema'),'https://signal.test');
+assert.equal(link.searchParams.get('url'),'https://example.com/?a=1&b=2');
+assert.equal(link.searchParams.get('finding'),'schema');
+assert.equal(issueBadge(sampleAudit,'all'),sampleAudit.findings.filter(f=>f.status==='critical'||f.status==='improvement').length);
+console.log('Workspace routes, query persistence, and navigation badges passed.');
