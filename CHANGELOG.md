@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — professional outputs
+
+- Added a bounded 20-URL bulk audit with two-request concurrency, comparison scores, top issues, input validation, per-site errors, and CSV export.
+- Added JSON and CSV actions beside the existing HTML and PDF report options.
+- Added optional client-side company and logo branding, a report cover, a one-page executive summary, and a prioritized fix list for printable PDFs. Branding is never uploaded or stored server-side.
+- Reused the existing audit engine and URL-safety rules for every bulk URL, with a separate one-batch-per-minute rate limit.
+
 ## Unreleased — site-wide audit depth
 
 - Added configurable sitemap-first crawling for 10, 25, or 50 same-origin pages with three-request concurrency and one temporary-failure retry.
