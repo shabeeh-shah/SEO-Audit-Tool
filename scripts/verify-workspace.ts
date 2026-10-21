@@ -3,6 +3,9 @@ import {workspaceNav,viewFromPath,viewHref,issueBadge} from '../lib/workspace-na
 import {sampleAudit} from '../lib/audit/sample';
 import {auditErrorKind} from '../lib/workspace-errors';
 import {parseDone} from '../lib/finding-tasks';
+import {crawlPageScore} from '../lib/crawl-display';
+import {analyzeCrawlPage} from '../lib/audit/crawl';
+import {extractProfile} from '../lib/audit/competitors';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {StatusChip,ScoreRing,ProgressSteps} from '../components/design-system';
@@ -17,6 +20,11 @@ assert.deepEqual(parseDone(JSON.stringify(['title','title','unknown']),sampleAud
 assert.deepEqual(parseDone('{broken',sampleAudit.findings),[]);
 assert.deepEqual(parseDone(JSON.stringify([{},null,3]),sampleAudit.findings),[]);
 assert.deepEqual(parseDone('a'.repeat(20_001),sampleAudit.findings),[]);
+const crawl=analyzeCrawlPage('<html lang="en"><head><title>Fixture</title></head><body><h1>Heading</h1></body></html>',{url:'https://example.com/',finalUrl:'https://example.com/',status:200,redirects:0,attempts:1,issue:''});
+assert.equal(crawlPageScore({...crawl,status:500}),0);
+assert.equal(crawlPageScore({...crawl,findings:[]}),null);
+assert.equal(crawlPageScore({...crawl,findings:[{id:'a',priority:'Good',evidence:'yes',fix:''},{id:'b',priority:'Improvement',evidence:'missing',fix:'Add'}]}),78);
+assert.deepEqual(extractProfile('<html><body><script type="application/ld+json">{"@type":"Organization"}</script><h1>Marketing services</h1></body></html>','https://example.com/').schemaTypes,['Organization']);
 const link=new URL(viewHref('recommendations','https://example.com/?a=1&b=2','schema'),'https://signal.test');
 assert.equal(link.searchParams.get('url'),'https://example.com/?a=1&b=2');
 assert.equal(link.searchParams.get('finding'),'schema');
