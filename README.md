@@ -12,7 +12,9 @@ Signal audits a public webpage and turns bounded technical and content evidence 
 - **Content:** extracted word count, English Flesch reading ease when enough text is available, repeated sentences, paragraph length, common terms, and heading structure.
 - **AI search readiness:** robots.txt rules for GPTBot, ClaudeBot, PerplexityBot, Google-Extended, and CCBot; JSON-LD syntax and Organization, FAQPage, Article, and Product declarations; question-style headings with concise answers; author and date signals; snippet controls; and optional, unscored llms.txt availability.
 - **Performance and mobile:** initial HTML response time and size, markup-level bottlenecks, up to six image-header samples, declared lazy loading, viewport and fixed-width risks, and an experimental 390 px sandboxed preview. The preview executes page JavaScript and attempts rendered word count, FCP, LCP, CLS, overflow, tap-target, oversized-image, and selected axe-core accessibility diagnostics.
-- **Separate tools:** same-origin discovery of up to 25 pages, comparison with up to two competitor pages, optional CrUX page-level mobile field data when a server-only API key is configured, stateless summary permalinks with LinkedIn and PNG sharing, HTML/JSON/CSV downloads, print-to-PDF, and browser-local audit history with comparisons.
+- **Separate tools:** a sitemap-first same-origin audit of 10, 25, or 50 pages with per-page results and a site-wide summary; comparison with up to two competitor pages; optional CrUX page-level mobile field data when a server-only API key is configured; stateless summary permalinks with LinkedIn and PNG sharing; HTML/JSON/CSV downloads; print-to-PDF; and browser-local audit history with comparisons.
+
+The site-wide audit checks broken internal destinations within its bounded page set, redirect chains, canonical conflicts, duplicate titles and meta descriptions, hreflang syntax and sampled return links, Open Graph and Twitter fields, selected security response headers, and basic server-HTML accessibility signals. It discovers sitemap entries first and falls back to permitted internal links, with three concurrent page fetches and one retry for temporary network failures.
 
 Every finding includes evidence and a plain-language next step. Sitemap contents are not validated by the quick audit, and sampled checks do not claim complete site coverage.
 
@@ -72,7 +74,7 @@ The score summarizes this documented ruleset. It does not predict or guarantee i
 
 ## Limitations
 
-- A quick audit inspects one HTML page, up to 8 internal links, and up to 6 image headers. Site discovery covers up to 25 same-origin pages in 40 seconds and reports partial coverage.
+- A quick audit inspects one HTML page, up to 8 internal links, and up to 6 image headers. The separate site-wide audit defaults to 25 same-origin pages, can be set from 10 to 50 in the interface, stops after 40 seconds, and clearly reports partial coverage. Broken-link and reciprocal-hreflang findings cover only destinations included in that bounded crawl.
 - HTML is capped at 1.5 MB, redirects at 3, and individual fetches at 15 seconds. In-memory per-connection/server-instance rate limits apply. Slow, blocked, oversized, and unreachable sites return explicit errors.
 - Only public HTTP(S) URLs are accepted. Local and private addresses, credentials, and custom ports are rejected; DNS and every redirect are revalidated. The fetcher respects applicable robots.txt rules and identifies itself with a clear User-Agent.
 - The sandboxed browser preview can differ from the original because of cookies, cross-origin resources, and script restrictions. Its measurements are diagnostics, not Lighthouse or official real-user Core Web Vitals. INP is not simulated.
@@ -83,8 +85,7 @@ The score summarizes this documented ruleset. It does not predict or guarantee i
 
 ## Roadmap
 
-- Broaden sitemap-driven crawl coverage while keeping scope and partial results visible.
-- Add richer duplicate-content, canonical-conflict, and structured-data validation fixtures.
+- Add richer duplicate-content and structured-data validation while keeping crawl scope and partial results visible.
 - Improve before-and-after reporting, scheduled monitoring, and portable history import.
 - Prepare the CLI and browser extension for separate reviewed releases.
 - Keep AI-readiness guidance aligned with published provider documentation without turning optional conventions into ranking claims.

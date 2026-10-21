@@ -12,7 +12,7 @@ const sections = [
   {label:'AI search readiness', selector:'.ai-readiness-section', icon:Sparkles, advanced:true},
   {label:'Recommendations', selector:'.findings-panel', icon:ListChecks},
   {label:'Competitor insights', selector:'.competitor-section', icon:ChartNoAxesColumnIncreasing, advanced:true},
-  {label:'Site discovery', selector:'.site-discovery', icon:Search, advanced:true},
+  {label:'Site-wide audit', selector:'.site-discovery', icon:Search, advanced:true},
   {label:'Fix drafts', selector:'.fix-generators', icon:Sparkles, advanced:true},
   {label:'Audit history', selector:'#audit-history', icon:FileText, advanced:true},
   {label:'Page details', selector:'.snapshot-panel', icon:FileText},

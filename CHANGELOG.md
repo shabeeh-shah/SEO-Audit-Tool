@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — site-wide audit depth
+
+- Added configurable sitemap-first crawling for 10, 25, or 50 same-origin pages with three-request concurrency and one temporary-failure retry.
+- Added a site summary and per-page evidence for broken internal links, redirect chains, canonical conflicts, duplicate titles and descriptions, hreflang, social metadata, security headers, and basic accessibility signals.
+- Preserved robots.txt enforcement, redirect-by-redirect public-address validation, response limits, timeouts, rate limits, and the existing SignalAudit User-Agent.
+- Added passing and failing site fixtures plus explicit localhost and private-address rejection tests.
+
 ## Unreleased — historical audit tracking
 
 - Added per-page history, category score trends, and arbitrary earlier-run comparisons.
