@@ -1,4 +1,5 @@
-import {parseHTML} from 'linkedom';
+// The self-contained Worker/browser build avoids an optional native canvas peer in dev.
+import {parseHTML} from 'linkedom/worker';
 
 export type Intent = {label:string; signals:string[]};
 export type PageProfile = {url:string; title:string; words:number; text:string; headings:{level:number;text:string}[]; h1:number; h2:number; h3:number; questions:number; lists:number; tables:number; intent:Intent; limited:boolean; schemaTypes?:string[]; topics?:string[]};

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — U1–U7 workspace redesign
+
+- Added persistent top-bar actions, grouped navigation, issue badges, refreshable report routes, breadcrumbs, and mobile bottom navigation.
+- Added shared design tokens and a component gallery, light/dark themes, a compact overview, contextual next steps, and finding deep links.
+- Added action-list completion stored in the browser, mobile fix and page drawers, copyable fix examples, keyboard controls, and consistent share/export feedback.
+- Added a command palette, shortcut help, dismissible onboarding, responsive screenshots, and fixture-driven Playwright tests at 390px and 1280px.
+- Preserved the audit engine, scoring weights, honest limitations, stateless public reports, and all URL-safety protections.
+
 ## Unreleased — professional outputs
 
 - Added a bounded 20-URL bulk audit with two-request concurrency, comparison scores, top issues, input validation, per-site errors, and CSV export.

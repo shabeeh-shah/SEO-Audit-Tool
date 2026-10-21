@@ -20,9 +20,9 @@ Every finding includes evidence and a plain-language next step. Sitemap contents
 
 ## Screenshot placeholder
 
-![Signal dashboard showing audit grades, evidence, and actionable recommendations](docs/signal-dashboard.jpg)
+![Signal dashboard showing audit grades, evidence, and actionable recommendations](docs/screenshots/overview-1280.png)
 
-Replace `docs/signal-dashboard.jpg` after meaningful interface changes so the repository preview stays current.
+Desktop, mobile, and dark-theme screenshots are in [`docs/screenshots/`](docs/screenshots/). The shared component gallery is available locally at `/dev/components`.
 
 ## Quick start
 
@@ -45,6 +45,8 @@ npm run lint
 npm test
 npm run build
 ```
+
+Run the desktop and mobile browser tests after building with `npm run test:e2e` (uses installed Chrome locally). See [workspace routes, shortcuts, storage, and browser test setup](docs/ui-workspace.md).
 
 The CLI source is included but is not published to npm:
 
