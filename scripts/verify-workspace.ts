@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
 import {workspaceNav,viewFromPath,viewHref,issueBadge} from '../lib/workspace-nav';
 import {sampleAudit} from '../lib/audit/sample';
+import {auditErrorKind} from '../lib/workspace-errors';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {StatusChip,ScoreRing,ProgressSteps} from '../components/design-system';
 assert.equal(new Set(workspaceNav.map(item=>item.route)).size,workspaceNav.length);
 for(const item of workspaceNav)assert.equal(viewFromPath(item.route),item.id);
 assert.equal(viewFromPath('/report/not-a-view'),'overview');
+assert.equal(auditErrorKind('This address is blocked.'),'blocked');
+assert.equal(auditErrorKind('The website took too long to respond.'),'timeout');
+assert.equal(auditErrorKind('This page does not return an HTML document.'),'not-html');
+assert.equal(auditErrorKind('Enter a valid website URL.'),'invalid-url');
 const link=new URL(viewHref('recommendations','https://example.com/?a=1&b=2','schema'),'https://signal.test');
 assert.equal(link.searchParams.get('url'),'https://example.com/?a=1&b=2');
 assert.equal(link.searchParams.get('finding'),'schema');
