@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/design-system';
 import type {CrawlReport} from '@/lib/audit/crawl';
 
 export default function SiteDiscovery({url,sample}:{url:string;sample?:boolean}){

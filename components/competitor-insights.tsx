@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,ChartNoAxesColumnIncreasing,Download,LoaderCircle,Users} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/design-system';
 import {Input} from '@/components/ui/input';
 import {sampleComparison,type CompetitorReport,type Opportunity} from '@/lib/audit/competitors';
 import {comparisonHtml} from '@/lib/audit/competitor-export';

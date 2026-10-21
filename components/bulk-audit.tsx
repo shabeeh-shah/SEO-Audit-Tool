@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 import {Download,FileUp,LoaderCircle,PlayCircle} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/design-system';
 import {bulkCsv,gradeFor,parseBulkInput,topIssue,type BulkAuditResult} from '@/lib/audit/bulk';
 
 function saveCsv(results:BulkAuditResult[]){const url=URL.createObjectURL(new Blob([bulkCsv(results)],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='signal-bulk-audit.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

@@ -17,7 +17,7 @@ import {useState,useEffect,useCallback,useRef} from 'react';
 import {flushSync} from 'react-dom';
 import Link from 'next/link';
 import {ArrowUpRight, ArrowRight, ChartNoAxesColumnIncreasing, Globe2, Search, Sparkles, FileText, Download, CircleHelp, Check, AlertCircle, LoaderCircle, X, Info, GitBranch, PlayCircle, ExternalLink, Share2, Printer, Copy, TrendingUp, TrendingDown, Gauge, Smartphone, Image as ImageIcon, ImageDown, Link2} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/design-system';
 import {Input} from '@/components/ui/input';
 import {Tabs,TabsList,TabsTrigger} from '@/components/ui/tabs';
 import {Accordion,AccordionItem,AccordionTrigger,AccordionContent} from '@/components/ui/accordion';

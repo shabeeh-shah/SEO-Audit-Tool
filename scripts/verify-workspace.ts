@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import {workspaceNav,viewFromPath,viewHref,issueBadge} from '../lib/workspace-nav';
 import {sampleAudit} from '../lib/audit/sample';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {StatusChip,ScoreRing,ProgressSteps} from '../components/design-system';
 assert.equal(new Set(workspaceNav.map(item=>item.route)).size,workspaceNav.length);
 for(const item of workspaceNav)assert.equal(viewFromPath(item.route),item.id);
 assert.equal(viewFromPath('/report/not-a-view'),'overview');
@@ -9,3 +12,6 @@ assert.equal(link.searchParams.get('url'),'https://example.com/?a=1&b=2');
 assert.equal(link.searchParams.get('finding'),'schema');
 assert.equal(issueBadge(sampleAudit,'all'),sampleAudit.findings.filter(f=>f.status==='critical'||f.status==='improvement').length);
 console.log('Workspace routes, query persistence, and navigation badges passed.');
+for(const status of ['good','improvement','critical','optional'] as const)assert.match(renderToStaticMarkup(createElement(StatusChip,{status})),new RegExp(status,'i'));
+assert.match(renderToStaticMarkup(createElement(ScoreRing,{score:900,label:'SEO'})),/100 of 100/);
+assert.match(renderToStaticMarkup(createElement(ProgressSteps,{steps:['Fetch','Check'],current:1})),/aria-current="step"/);

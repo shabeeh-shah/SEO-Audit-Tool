@@ -1,6 +1,6 @@
 'use client';
 import {useState} from 'react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/design-system';
 import {fixDrafts} from '@/lib/audit/fixes';
 import type {Audit} from '@/lib/audit/types';
 export default function FixGenerators({audit}:{audit:Audit}){

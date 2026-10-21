@@ -1,6 +1,6 @@
 'use client';
 import {useState} from 'react';
-import {Button} from '@/components/ui/button';
+import {Button} from '@/components/design-system';
 import {categories,type Audit,type Category} from '@/lib/audit/types';
 import {compareRuns,HISTORY_LIMIT,pageKey,runKey} from '@/lib/audit/history';
 import {sampleHistory} from '@/lib/audit/history-sample';
