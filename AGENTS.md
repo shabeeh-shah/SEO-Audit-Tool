@@ -5,7 +5,7 @@
 - Node.js 22.13 or newer, npm, TypeScript in strict mode, and ESM.
 - Vinext `1.0.0-beta.5` provides a Next.js 16 App Router-compatible application on Vite 8.
 - React 19 powers the UI. Tailwind CSS 4, shadcn/Radix primitives, Lucide icons, and component-specific CSS provide styling and interaction.
-- Server routes run on the Web `Request`/`Response` APIs and are intended for Cloudflare Workers. D1/SQLite plus Drizzle stores explicitly shared report snapshots.
+- Server routes run on the Web `Request`/`Response` APIs and are intended for Cloudflare Workers. Shared summaries are stateless, strictly validated URL payloads; the app does not store report snapshots server-side.
 - `linkedom` parses fetched HTML, Zod validates browser-stored audit history, and the isolated render route uses the vendored axe-core bundle for limited accessibility diagnostics.
 - Tests are executable TypeScript verification scripts using `node:assert/strict` and HTML fixtures rather than a separate test runner.
 
@@ -14,8 +14,7 @@
 - `app/`: App Router pages, metadata, OG images, shared-report pages, MCP endpoint, and server API routes.
 - `components/`: Signal dashboard features and the vendored shadcn UI primitives in `components/ui/`.
 - `hooks/`: browser-only state helpers, including audit-history persistence.
-- `lib/audit/`: URL safety, robots handling, HTML analysis, scoring, crawling, comparisons, exports, reports, field data, history, and shared audit types.
-- `db/` and `drizzle/`: shared-report schema and migration.
+- `lib/audit/`: URL safety, robots handling, HTML analysis, scoring, crawling, comparisons, exports, stateless sharing, field data, history, and shared audit types.
 - `scripts/` and `tests/fixtures/`: executable verification scripts and test fixtures.
 - `packages/cli/`, `action.yml`, and `extension/`: CLI, composite GitHub Action, and unpacked Chrome extension distribution surfaces.
 - `public/vendor/` and `vendor/`: third-party vendored files; preserve their source and licenses.

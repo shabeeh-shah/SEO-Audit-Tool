@@ -12,7 +12,7 @@ Signal audits a public webpage and turns bounded technical and content evidence 
 - **Content:** extracted word count, English Flesch reading ease when enough text is available, repeated sentences, paragraph length, common terms, and heading structure.
 - **AI search readiness:** robots.txt rules for GPTBot, ClaudeBot, PerplexityBot, Google-Extended, and CCBot; JSON-LD syntax and Organization, FAQPage, Article, and Product declarations; question-style headings with concise answers; author and date signals; snippet controls; and optional, unscored llms.txt availability.
 - **Performance and mobile:** initial HTML response time and size, markup-level bottlenecks, up to six image-header samples, declared lazy loading, viewport and fixed-width risks, and an experimental 390 px sandboxed preview. The preview executes page JavaScript and attempts rendered word count, FCP, LCP, CLS, overflow, tap-target, oversized-image, and selected axe-core accessibility diagnostics.
-- **Separate tools:** same-origin discovery of up to 25 pages, comparison with up to two competitor pages, optional CrUX page-level mobile field data when a server-only API key is configured, shareable snapshots, HTML/JSON/CSV downloads, print-to-PDF, and browser-local audit history with comparisons.
+- **Separate tools:** same-origin discovery of up to 25 pages, comparison with up to two competitor pages, optional CrUX page-level mobile field data when a server-only API key is configured, stateless summary permalinks with LinkedIn and PNG sharing, HTML/JSON/CSV downloads, print-to-PDF, and browser-local audit history with comparisons.
 
 Every finding includes evidence and a plain-language next step. Sitemap contents are not validated by the quick audit, and sampled checks do not claim complete site coverage.
 
@@ -78,7 +78,7 @@ The score summarizes this documented ruleset. It does not predict or guarantee i
 - The sandboxed browser preview can differ from the original because of cookies, cross-origin resources, and script restrictions. Its measurements are diagnostics, not Lighthouse or official real-user Core Web Vitals. INP is not simulated.
 - Real-user mobile LCP, INP, and CLS require a server-only `CRUX_API_KEY` and sufficient Chrome UX Report coverage. Field data never changes the heuristic score.
 - Competitor phrases, heading gaps, and intent labels are lexical heuristics. They do not use search volume, keyword difficulty, ranking, or semantic-equivalence data.
-- Browser history stores up to 100 successful runs or 3 MB on the current browser and origin. It does not sync across devices. Explicitly shared report snapshots are public to anyone with the unique link.
+- Browser history stores up to 100 successful runs or 3 MB on the current browser and origin. It does not sync across devices. Share links are public and encode only the public page URL, overall score, four category scores, and up to three fix titles; no report is stored server-side.
 - Automated accessibility findings do not replace manual keyboard, screen-reader, contrast, or usability testing.
 
 ## Roadmap
