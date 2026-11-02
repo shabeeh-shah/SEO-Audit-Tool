@@ -62,3 +62,27 @@ assert.match(progress,/Unavailable/);assert.doesNotMatch(progress,/In progress/)
 const {auditInputError}=await import('../lib/workspace-experience');
 for(const value of ['',null,'not a url','ftp://example.com/','https://exa mple.com/','a'.repeat(2049)])assert.ok(auditInputError(value));
 for(const value of ['example.com','https://example.com/path?q=a%20b','  https://example.com/  '])assert.equal(auditInputError(value),null);
+
+// Recommendation ordering is lexicographic impact / effort, never an impact-to-effort ratio.
+const {sortActionFindings}=await import('../lib/finding-tasks');
+const actionFixture=[
+ {...sampleAudit.findings[0],id:'schema',status:'critical' as const,weight:2},
+ {...sampleAudit.findings[0],id:'description',status:'critical' as const,weight:1},
+ {...sampleAudit.findings[0],id:'alt',status:'improvement' as const,weight:2},
+ {...sampleAudit.findings[0],id:'viewport',status:'improvement' as const,weight:2},
+ {...sampleAudit.findings[0],id:'title',status:'good' as const,weight:1},
+ {...sampleAudit.findings[0],id:'llms-txt',status:'optional' as const,weight:0},
+];
+const originalOrder=actionFixture.map(f=>f.id);
+assert.deepEqual(sortActionFindings(actionFixture).map(f=>f.id),['description','schema','viewport','alt','title','llms-txt']);
+assert.deepEqual(sortActionFindings(actionFixture,'effort').map(f=>f.id),['description','viewport','alt','schema','title','llms-txt']);
+assert.deepEqual(actionFixture.map(f=>f.id),originalOrder);
+assert.deepEqual(sortActionFindings([]),[]);
+const {default:RecommendationDetail}=await import('../components/recommendation-detail');
+const snippet=renderToStaticMarkup(createElement(RecommendationDetail,{finding:actionFixture[0],text:{why:'Clear source signals',change:'Add valid markup',example:'<script>alert("example")</script>'}}));
+assert.match(snippet,/Copy fix/);assert.match(snippet,/&lt;script&gt;/);assert.doesNotMatch(snippet,/<script>/);
+const noSnippet=renderToStaticMarkup(createElement(RecommendationDetail,{finding:actionFixture[5],text:{why:'Optional context',change:'Review if useful',example:' '}}));
+assert.doesNotMatch(noSnippet,/Copy fix/);assert.match(noSnippet,/excluded from the score/);
+
+const goodHighWeight={...actionFixture[4],id:'lang',weight:5};
+assert.equal(sortActionFindings([goodHighWeight,{...actionFixture[3],weight:1}])[0].status,'improvement');
