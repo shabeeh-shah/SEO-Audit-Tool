@@ -179,3 +179,77 @@ test('Pages contextual action uses the selected bounded limit and sorts real row
  await page.getByRole('button',{name:'View Zulu',exact:true}).click();await expect(page.getByRole('dialog')).toContainText('HTTP 503');await page.keyboard.press('Escape');
  await page.screenshot({path:`docs/screenshots/analysis-pages-${isMobile?'390':'1280'}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });
+
+test('share feedback commits immediately, prevents duplicate copies, and handles clipboard failures',async({page,isMobile})=>{
+ await audit(page);await page.getByRole('button',{name:'Share report',exact:true}).click();
+ await page.evaluate(()=>{
+  const state=window as Window&{finishCopy?:()=>void;copyCalls?:number};state.copyCalls=0;
+  Object.defineProperty(navigator.clipboard,'writeText',{configurable:true,value:()=>{state.copyCalls!++;return new Promise<void>(resolve=>{state.finishCopy=resolve;});}});
+ });
+ const immediate=await page.evaluate(()=>{const button=document.querySelector<HTMLButtonElement>('[data-output="share-copy"]')!;const start=performance.now();button.click();button.click();return {busy:button.getAttribute('aria-busy'),disabled:button.disabled,elapsed:performance.now()-start,calls:(window as unknown as Window&{copyCalls:number}).copyCalls};});
+ expect(immediate.busy).toBe('true');expect(immediate.disabled).toBe(true);expect(immediate.calls).toBe(1);expect(immediate.elapsed).toBeLessThan(100);
+ await expect(page.getByText('Copying share link…',{exact:true})).toBeVisible();
+ await page.evaluate(()=>(window as unknown as Window&{finishCopy:()=>void}).finishCopy());await expect(page.getByText('Share link copied. It contains only the public URL, scores, and three fix titles.',{exact:true})).toBeVisible();
+ await page.screenshot({path:`docs/screenshots/outputs-share-${isMobile?'390':'1280'}.png`});
+ await page.evaluate(()=>Object.defineProperty(navigator.clipboard,'writeText',{configurable:true,value:()=>Promise.reject(new Error('Clipboard is unavailable. Copy the visible Share URL manually.'))}));
+ await page.getByRole('dialog').getByRole('button',{name:'Copy link',exact:true}).click();await expect(page.getByText('Clipboard is unavailable. Copy the visible Share URL manually.',{exact:true})).toBeVisible();
+ await expect(page.getByRole('dialog').getByLabel('Share URL')).toHaveValue(/\/report\//);await expect(page.getByRole('dialog').getByRole('button',{name:'Copy link',exact:true})).toBeEnabled();
+ await page.getByRole('button',{name:'Review audit recommendations',exact:true}).click();await expect(page).toHaveURL(/report\/recommendations/);
+});
+
+test('every export has its own feedback, repeated exports work, and blocked popups are errors',async({page})=>{
+ await audit(page);
+ for(const format of ['HTML','JSON','CSV','JSON']){
+  await page.getByRole('button',{name:'Export report',exact:true}).click();const event=page.waitForEvent('download');await page.getByRole('menuitem',{name:`Export ${format}`,exact:true}).click();expect((await event).suggestedFilename()).toMatch(new RegExp(`\\.${format.toLowerCase()}$`));await expect(page.getByText(`${format} report downloaded.`,{exact:true}).last()).toBeVisible();
+ }
+ await page.evaluate(()=>{window.open=()=>null;});await page.getByRole('button',{name:'Export report',exact:true}).click();await page.getByRole('menuitem',{name:'Export PDF',exact:true}).click();
+ await expect(page.getByText('Allow pop-ups to export this report as a PDF.',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Export report',exact:true})).not.toHaveAttribute('aria-busy','true');
+ await page.getByRole('button',{name:'Share report',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Share on LinkedIn',exact:true}).click();await expect(page.getByText('Allow pop-ups to open LinkedIn sharing, or copy the link instead.',{exact:true})).toBeVisible();
+});
+
+test('history lists local grades and changes, re-runs exact URL, and clears only with confirmation',async({page,isMobile})=>{
+ const older={...structuredClone(live),date:'2026-10-20T12:00:00Z',score:live.score-4};
+ older.findings=older.findings.map((finding,index)=>index<2?{...finding,status:'critical' as const}:finding);
+ const newer={...structuredClone(live),date:'2026-10-21T12:00:00Z'};newer.findings=newer.findings.map((finding,index)=>index<2?{...finding,status:'good' as const}:finding);
+ await page.addInitScript(({older,newer})=>{localStorage.setItem('signal-audit-history',JSON.stringify([newer,older]));localStorage.setItem('signal-other-preference','preserved');},{older,newer});
+ await page.goto('/report/history?url='+encodeURIComponent(live.url));const table=page.getByRole('table',{name:`Saved runs for ${live.url}`});
+ await expect(table.locator('tbody tr')).toHaveCount(2);await expect(table.locator('tbody tr').first()).toContainText('+4 points');await expect(table.locator('tbody tr').first()).toContainText('2 issues fixed');await expect(table).toContainText(live.url);
+ await expect(page.locator('.audit-history')).toContainText('Saved on this browser and device only');
+ await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`docs/screenshots/outputs-history-${isMobile?'390':'1280'}.png`,fullPage:true});
+ await table.locator('tbody tr').first().getByRole('button',{name:/Re-run/}).click();await expect(page).toHaveURL(/report\/overview/);await expect(page.locator('.ws-summary-url')).toContainText(live.url);
+ await go(page,'history',isMobile);await page.getByRole('button',{name:'Clear saved history'}).click();await page.getByRole('button',{name:'Keep history'}).click();await expect(table.locator('tbody tr')).toHaveCount(2);
+ await page.getByRole('button',{name:'Clear saved history'}).click();await page.getByRole('button',{name:'Remove saved runs',exact:true}).click();await expect(page.locator('.history-empty')).toBeVisible();expect(await page.evaluate(()=>localStorage.getItem('signal-audit-history'))).toBeNull();expect(await page.evaluate(()=>localStorage.getItem('signal-other-preference'))).toBe('preserved');
+ await expect(page.locator('.history-empty').getByRole('button',{name:'Start an audit'})).toBeVisible();
+});
+
+test('bulk output saves successful runs locally and offers report, retry, and CSV actions',async({page,isMobile})=>{
+ await page.route('**/api/bulk',route=>route.fulfill({json:{results:[{requestedUrl:live.url,audit:live},{requestedUrl:'https://example.org/',error:'The website took too long to respond.'}]}}));
+ await page.goto('/report/bulk');await page.getByLabel('Upload URL file',{exact:true}).setInputFiles({name:'urls.csv',mimeType:'text/csv',buffer:Buffer.from('url\nhttps://example.com/\nhttps://example.org/')});
+ await expect(page.getByText('URL file loaded. Review the list, then run the bulk audit.',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Run bulk audit',exact:true}).click();
+ const table=page.getByRole('table',{name:'Bulk audit comparison'});await expect(page.getByRole('region',{name:'Bulk results',exact:true})).toHaveAttribute('tabindex','0');await expect(table).toContainText('Could not audit');await expect(page.locator('.ws-bulk-progress')).toContainText('Complete');
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Download comparison CSV',exact:true}).click();expect((await download).suggestedFilename()).toBe('signal-bulk-audit.csv');await expect(page.getByText('Comparison CSV downloaded.',{exact:true})).toBeVisible();
+ const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('signal-audit-history')||'[]'));expect(stored).toHaveLength(1);expect(stored[0].url).toBe(live.url);
+ await table.getByRole('button',{name:'Retry this URL',exact:true}).click();await expect(page.getByLabel('Website URLs',{exact:true})).toHaveValue('https://example.org/');
+ await page.evaluate(()=>{scrollTo(0,0);document.querySelector('.bulk-table-wrap')!.scrollLeft=0;});await page.screenshot({path:`docs/screenshots/outputs-bulk-${isMobile?'390':'1280'}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await table.getByRole('button',{name:`Open report for ${live.url}`,exact:true}).click();await expect(page).toHaveURL(/report\/overview/);await expect(page.locator('.ws-summary-url')).toContainText(live.url);
+ await go(page,'history',isMobile);await expect(page.getByRole('table',{name:`Saved runs for ${live.url}`})).toBeVisible();
+});
+
+test('bulk upload validation and cancellation keep a late batch out of history',async({page})=>{
+ await page.goto('/report/bulk');let requests=0;page.on('request',request=>{if(new URL(request.url()).pathname==='/api/bulk')requests++;});
+ const upload=page.getByLabel('Upload URL file',{exact:true});await upload.setInputFiles({name:'wrong.html',mimeType:'text/html',buffer:Buffer.from('<html>not a URL list</html>')});await expect(page.getByText('Choose a TXT or CSV file.',{exact:true})).toBeVisible();
+ await upload.setInputFiles({name:'large.csv',mimeType:'text/csv',buffer:Buffer.alloc(50_001)});await expect(page.getByText('Choose a text or CSV file smaller than 50 KB.',{exact:true})).toBeVisible();expect(requests).toBe(0);
+ let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});await page.route('**/api/bulk',async route=>{await gate;await route.fulfill({json:{results:[{requestedUrl:live.url,audit:live}]}}).catch(()=>{});});
+ await page.getByLabel('Website URLs',{exact:true}).fill(live.url);await page.getByRole('button',{name:'Run bulk audit',exact:true}).click();await expect(page.getByRole('button',{name:'Auditing websites…',exact:true})).toBeDisabled();await expect(page.locator('.ws-bulk-progress')).toContainText('awaiting result');
+ await page.getByRole('button',{name:'Cancel bulk audit',exact:true}).click();release();await expect(page.locator('.ws-bulk-progress')).toContainText('Batch stopped');await expect(page.getByRole('alert')).toContainText('canceled');await expect(page.locator('.bulk-table-wrap')).toHaveCount(0);expect(await page.evaluate(()=>localStorage.getItem('signal-audit-history'))).toBeNull();
+ await expect(page.getByRole('button',{name:'Try bulk audit again',exact:true})).toBeEnabled();
+});
+
+test('history backup downloads and a blocked clear preserves reports for retry',async({page,isMobile})=>{
+ await audit(page);await go(page,'history',isMobile);
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export history JSON',exact:true}).click();expect((await download).suggestedFilename()).toBe('signal-audit-history.json');await expect(page.getByText('History JSON downloaded. Keep it as a backup of these reports.',{exact:true}).last()).toBeVisible();
+ await page.evaluate(()=>{Storage.prototype.removeItem=()=>{throw new Error('Storage denied');};});
+ await page.getByRole('button',{name:'Clear saved history',exact:true}).click();await page.getByRole('button',{name:'Remove saved runs',exact:true}).click();
+ await expect(page.getByRole('dialog',{name:'Clear saved history?'})).toBeVisible();await expect(page.getByText('History could not be cleared because browser storage is unavailable.',{exact:true}).last()).toBeVisible();expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('signal-audit-history')||'[]').length)).toBe(1);
+ await expect(page.getByRole('button',{name:'Remove saved runs',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Keep history',exact:true}).click();
+});
