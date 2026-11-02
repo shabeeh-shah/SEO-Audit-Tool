@@ -35,7 +35,7 @@ npm ci
 npm run dev
 ```
 
-Open the local address printed by the development server. **Preview offline sample** and **Explore sample comparison** use bundled fictional data without making an audit request. `demo.html` is a lightweight visual demo rather than the complete audit engine.
+Open the local address printed by the development server. **See sample** and **Explore sample comparison** use bundled fictional data without making an audit request. `demo.html` is a lightweight visual demo rather than the complete audit engine.
 
 Before submitting a change, run:
 

@@ -1,4 +1,5 @@
 import type {Audit} from './audit/types';
+export type WorkspaceNavItem={id:string;label:string;group:'Audit'|'Analyze'|'Compare'|'Learn';icon:'overview'|'fixes'|'pages'|'seo'|'ai'|'performance'|'compare'|'bulk'|'history'|'help';route:string;badge:string;enabled:boolean;description:string};
 export const workspaceNav=[
  {id:'overview',label:'Overview',group:'Audit',icon:'overview',route:'/report/overview',badge:'all',enabled:true,description:'Your results, strongest signals, and three useful fixes.'},
  {id:'recommendations',label:'Recommendations',group:'Audit',icon:'fixes',route:'/report/recommendations',badge:'all',enabled:true,description:'Turn evidence into changes you can review and complete.'},
@@ -11,8 +12,8 @@ export const workspaceNav=[
  {id:'history',label:'History',group:'Compare',icon:'history',route:'/report/history',badge:'',enabled:true,description:'Reopen saved browser snapshots and compare changes over time.'},
  {id:'scoring',label:'How scoring works',group:'Learn',icon:'help',route:'/report/scoring',badge:'',enabled:true,description:'Inspect every check, weight, and score contribution.'},
  {id:'checks',label:'About the checks',group:'Learn',icon:'help',route:'/report/checks',badge:'',enabled:true,description:'Understand scope, limitations, privacy, and available tools.'},
-] as const;
+] as const satisfies readonly WorkspaceNavItem[];
 export type WorkspaceView=typeof workspaceNav[number]['id'];
-export function viewFromPath(path:string):WorkspaceView{return workspaceNav.find(item=>item.route===path.replace(/\/$/,''))?.id||'overview';}
-export function viewHref(view:WorkspaceView,url='',finding=''){const params=new URLSearchParams();if(url)params.set('url',url);if(finding)params.set('finding',finding);return `/report/${view}${params.size?'?'+params:''}`;}
+export function viewFromPath(path:string):WorkspaceView{return workspaceNav.find(item=>item.enabled&&item.route===path.replace(/\/$/,''))?.id||'overview';}
+export function viewHref(view:WorkspaceView,url='',finding=''){const params=new URLSearchParams();if(url)params.set('url',url);if(finding)params.set('finding',finding);const item=workspaceNav.find(item=>item.id===view&&item.enabled)||workspaceNav[0];return `${item.route}${params.size?'?'+params:''}`;}
 export function issueBadge(audit:Audit,badge:string){return audit.findings.filter(f=>(f.status==='critical'||f.status==='improvement')&&(badge==='all'||badge.split(',').includes(f.category))).length;}
