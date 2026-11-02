@@ -2,7 +2,7 @@
 // redirect-by-redirect validation provide a second guard against SSRF.
 export const AUDIT_USER_AGENT='SignalAudit/1.1 (+https://signal-audit-lab.shabeehshah42.chatgpt.site)';
 const MAX_REDIRECTS=3;
-const MAX_HTML_BYTES=1_500_000;
+const MAX_HTML_BYTES=3_000_000;
 const MAX_TEXT_BYTES=200_000;
 
 export class FetchSafetyError extends Error {
@@ -66,9 +66,9 @@ function declaredTooLarge(response:Response,limit:number){const length=Number(re
 export async function readHtml(response:Response){
  if(!response.ok)throw new Error(`The website returned HTTP ${response.status}. It may be unavailable or blocking automated access.`);
  if(!/text\/html|application\/xhtml\+xml/i.test(response.headers.get('content-type')||'')){await response.body?.cancel();throw new Error('That URL does not return an HTML webpage. Try a page URL instead of a file.');}
- if(declaredTooLarge(response,MAX_HTML_BYTES)){await response.body?.cancel();throw new Error('This page is too large for a quick audit (1.5 MB HTML limit). Try a smaller page.');}
+ if(declaredTooLarge(response,MAX_HTML_BYTES)){await response.body?.cancel();throw new Error('This page is too large for a quick audit (3 MB HTML limit). Try a smaller page.');}
  const reader=response.body?.getReader();if(!reader)throw new Error('The website returned an empty page.');const decoder=new TextDecoder();let html='',bytes=0;
- try{while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>MAX_HTML_BYTES)throw new Error('This page is too large for a quick audit (1.5 MB HTML limit). Try a smaller page.');html+=decoder.decode(value,{stream:true});}html+=decoder.decode();}finally{await reader.cancel().catch(()=>{});}return {html,bytes};
+ try{while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>MAX_HTML_BYTES)throw new Error('This page is too large for a quick audit (3 MB HTML limit). Try a smaller page.');html+=decoder.decode(value,{stream:true});}html+=decoder.decode();}finally{await reader.cancel().catch(()=>{});}return {html,bytes};
 }
 export async function readText(response:Response,limit=MAX_TEXT_BYTES){
  if(declaredTooLarge(response,limit)){await response.body?.cancel();throw new Error('Response is too large to inspect.');}

@@ -21,7 +21,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "test": "node --import tsx scripts/verify-audit.ts && node --import tsx scripts/verify-audit-checks.ts && node --import tsx scripts/verify-competitors.ts && node --import tsx scripts/verify-product-updates.ts && node --import tsx scripts/verify-crawl.ts && node --import tsx scripts/verify-history.ts && node --import tsx scripts/verify-discoverability.ts && node --import tsx scripts/verify-sharing.ts && node --import tsx scripts/verify-professional-exports.ts && node --import tsx scripts/verify-workspace.ts"
+    "test": "node --import tsx scripts/verify-audit.ts && node --import tsx scripts/verify-fetch-limits.ts && node --import tsx scripts/verify-audit-checks.ts && node --import tsx scripts/verify-competitors.ts && node --import tsx scripts/verify-product-updates.ts && node --import tsx scripts/verify-crawl.ts && node --import tsx scripts/verify-history.ts && node --import tsx scripts/verify-discoverability.ts && node --import tsx scripts/verify-sharing.ts && node --import tsx scripts/verify-professional-exports.ts && node --import tsx scripts/verify-workspace.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

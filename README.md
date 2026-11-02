@@ -77,7 +77,7 @@ The score summarizes this documented ruleset. It does not predict or guarantee i
 ## Limitations
 
 - A quick audit inspects one HTML page, up to 8 internal links, and up to 6 image headers. The separate site-wide audit defaults to 25 same-origin pages, can be set from 10 to 50 in the interface, stops after 40 seconds, and clearly reports partial coverage. Broken-link and reciprocal-hreflang findings cover only destinations included in that bounded crawl.
-- HTML is capped at 1.5 MB, redirects at 3, and individual fetches at 15 seconds. In-memory per-connection/server-instance rate limits apply. Slow, blocked, oversized, and unreachable sites return explicit errors.
+- HTML is capped at 3 MB (3,000,000 bytes), redirects at 3, and individual fetches at 15 seconds. In-memory per-connection/server-instance rate limits apply. Slow, blocked, oversized, and unreachable sites return explicit errors.
 - Only public HTTP(S) URLs are accepted. Local and private addresses, credentials, and custom ports are rejected; DNS and every redirect are revalidated. The fetcher respects applicable robots.txt rules and identifies itself with a clear User-Agent.
 - The sandboxed browser preview can differ from the original because of cookies, cross-origin resources, and script restrictions. Its measurements are diagnostics, not Lighthouse or official real-user Core Web Vitals. INP is not simulated.
 - Real-user mobile LCP, INP, and CLS require a server-only `CRUX_API_KEY` and sufficient Chrome UX Report coverage. Field data never changes the heuristic score.
