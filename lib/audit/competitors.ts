@@ -1,7 +1,8 @@
-import {parseHTML} from 'linkedom';
+// The self-contained Worker/browser build avoids an optional native canvas peer in dev.
+import {parseHTML} from 'linkedom/worker';
 
 export type Intent = {label:string; signals:string[]};
-export type PageProfile = {url:string; title:string; words:number; text:string; headings:{level:number;text:string}[]; h1:number; h2:number; h3:number; questions:number; lists:number; tables:number; intent:Intent; limited:boolean};
+export type PageProfile = {url:string; title:string; words:number; text:string; headings:{level:number;text:string}[]; h1:number; h2:number; h3:number; questions:number; lists:number; tables:number; intent:Intent; limited:boolean; schemaTypes?:string[]; topics?:string[]};
 export type Evidence = {url:string; excerpt:string};
 export type Opportunity = {term:string; priority:'High'|'Medium'; evidence:Evidence[]; why:string; fix:string; example:string};
 export type CompetitorReport = {date:string; sample?:boolean; target:string; baseline:Omit<PageProfile,'text'>; competitors:Omit<PageProfile,'text'>[]; keywords:Opportunity[]; gaps:Opportunity[]; targetCoverage:{url:string; count:number; inTitle:boolean; inHeading:boolean}[]; errors:{url:string; message:string}[]};
@@ -20,6 +21,7 @@ export function estimateIntent(title:string,headings:string[]):Intent{
 }
 export function extractProfile(html:string,url:string):PageProfile{
  const {document}=parseHTML(html);const title=clean(document.querySelector('title')?.textContent||'').slice(0,300);
+ const schemaTypes:string[]=[];document.querySelectorAll('script[type="application/ld+json"]').forEach(node=>{try{const visit=(value:unknown,depth=0)=>{if(depth>10||!value||typeof value!=='object')return;if(Array.isArray(value)){value.slice(0,100).forEach(item=>visit(item,depth+1));return;}const record=value as Record<string,unknown>;const type=record['@type'];if(typeof type==='string')schemaTypes.push(type.slice(0,100));if(Array.isArray(type))type.filter((item):item is string=>typeof item==='string').forEach(item=>schemaTypes.push(item.slice(0,100)));if(record['@graph'])visit(record['@graph'],depth+1);};visit(JSON.parse(node.textContent||''));}catch{}});
  document.querySelectorAll('script,style,noscript,template,nav,footer,[hidden],[aria-hidden="true"]').forEach(node=>node.remove());
  document.querySelectorAll('header').forEach(node=>{if(!node.closest('main,[role="main"],article'))node.remove();});
  const root=document.querySelector('main,[role="main"],article')||document.body;
@@ -28,7 +30,7 @@ export function extractProfile(html:string,url:string):PageProfile{
  const full=clean(paragraphs.length?paragraphs.join(' '):root.textContent||'');const text=full.slice(0,120000);
  const headings=Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6')).slice(0,100).map(node=>({level:Number(node.tagName.slice(1)),text:clean(node.textContent||'').slice(0,240)}));
  const words=normalize(text).split(' ').filter(Boolean).length;
- return {url,title,words,text,headings,h1:headings.filter(h=>h.level===1).length,h2:headings.filter(h=>h.level===2).length,h3:headings.filter(h=>h.level===3).length,questions:headings.filter(h=>/\?|^(how|what|why|when|where|who|can|does|is|are)\b/i.test(h.text)).length,lists:root.querySelectorAll('ul,ol').length,tables:root.querySelectorAll('table').length,intent:estimateIntent(title,headings.map(h=>h.text)),limited:words<80||full.length>120000};
+ return {url,title,words,text,headings,schemaTypes:[...new Set(schemaTypes)].slice(0,20),topics:[...new Set(tokens(text))].slice(0,12),h1:headings.filter(h=>h.level===1).length,h2:headings.filter(h=>h.level===2).length,h3:headings.filter(h=>h.level===3).length,questions:headings.filter(h=>/\?|^(how|what|why|when|where|who|can|does|is|are)\b/i.test(h.text)).length,lists:root.querySelectorAll('ul,ol').length,tables:root.querySelectorAll('table').length,intent:estimateIntent(title,headings.map(h=>h.text)),limited:words<80||full.length>120000};
 }
 const publicProfile=({text,...profile}:PageProfile)=>profile;
 function snippet(page:PageProfile,term:string){const heading=page.headings.find(h=>counts(h.text,term));if(heading)return heading.text;const at=page.text.toLowerCase().indexOf(term.toLowerCase());return clean(page.text.slice(Math.max(0,at-60),Math.max(0,at-60)+220));}

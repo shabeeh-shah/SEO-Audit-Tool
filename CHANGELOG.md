@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased — U1–U7 workspace redesign
+
+- Added persistent top-bar actions, grouped navigation, issue badges, refreshable report routes, breadcrumbs, and mobile bottom navigation.
+- Added shared design tokens and a component gallery, light/dark themes, a compact overview, contextual next steps, and finding deep links.
+- Added action-list completion stored in the browser, mobile fix and page drawers, copyable fix examples, keyboard controls, and consistent share/export feedback.
+- Added a command palette, shortcut help, dismissible onboarding, responsive screenshots, and fixture-driven Playwright tests at 390px and 1280px.
+- Preserved the audit engine, scoring weights, honest limitations, stateless public reports, and all URL-safety protections.
+
+## Unreleased — professional outputs
+
+- Added a bounded 20-URL bulk audit with two-request concurrency, comparison scores, top issues, input validation, per-site errors, and CSV export.
+- Added JSON and CSV actions beside the existing HTML and PDF report options.
+- Added optional client-side company and logo branding, a report cover, a one-page executive summary, and a prioritized fix list for printable PDFs. Branding is never uploaded or stored server-side.
+- Reused the existing audit engine and URL-safety rules for every bulk URL, with a separate one-batch-per-minute rate limit.
+
+## Unreleased — site-wide audit depth
+
+- Added configurable sitemap-first crawling for 10, 25, or 50 same-origin pages with three-request concurrency and one temporary-failure retry.
+- Added a site summary and per-page evidence for broken internal links, redirect chains, canonical conflicts, duplicate titles and descriptions, hreflang, social metadata, security headers, and basic accessibility signals.
+- Preserved robots.txt enforcement, redirect-by-redirect public-address validation, response limits, timeouts, rate limits, and the existing SignalAudit User-Agent.
+- Added passing and failing site fixtures plus explicit localhost and private-address rejection tests.
+
 ## Unreleased — historical audit tracking
 
 - Added per-page history, category score trends, and arbitrary earlier-run comparisons.

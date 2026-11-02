@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {analyzePage} from '../lib/audit/analyze';
 import {sampleAudit} from '../lib/audit/sample';
+import {calculateScores,CHECKS,SCORING_VERSION,validateFindingDefinitions} from '../lib/audit/scoring';
 import type {Audit, BotAccess, LinkResult} from '../lib/audit/types';
-import {auditUrl,goodPage,shortPage} from '../tests/fixtures/audit-pages';
+import {auditUrl,blockingAiCrawlerPage,goodPage,missingStructuredDataPage,shortPage,strongPage,thinContentPage} from '../tests/fixtures/audit-pages';
 
 const allowedBots:BotAccess[]=['GPTBot','ClaudeBot','PerplexityBot','Google-Extended','CCBot'].map(bot=>({bot,state:'allowed',source:'*',rule:'No matching Allow or Disallow rule.'}));
 type AnalyzeOptions=NonNullable<Parameters<typeof analyzePage>[2]>;
@@ -11,10 +12,13 @@ const inspect=(html=goodPage,options:Partial<AnalyzeOptions>={},url=auditUrl)=>a
 const status=(audit:Audit,id:string)=>audit.findings.find(f=>f.id===id)?.status;
 const expectStatus=(id:string,expected:'good'|'improvement'|'critical'|'optional',html?:string,options?:Partial<AnalyzeOptions>,url?:string)=>assert.equal(status(inspect(html,options,url),id),expected,id);
 
-const expectedIds=['title','description','h1','outline','alt','indexing','canonical','https','viewport','lang','links','redirects','robots-txt','sitemap','social-cards','page-speed','large-images','performance-bottlenecks','mobile-usability','core-web-vitals','ai-crawlers','llms-txt','copy','readability','repetition','paragraphs','text-access','sections','answers','schema','authorship','snippets','security-headers','hreflang'];
+const expectedIds=['title','description','h1','outline','alt','indexing','canonical','https','viewport','lang','links','redirects','robots-txt','sitemap','social-cards','page-speed','large-images','performance-bottlenecks','mobile-usability','core-web-vitals','ai-crawlers','llms-txt','copy','readability','repetition','paragraphs','content-gaps','text-access','sections','answers','schema','authorship','snippets','security-headers','hreflang'];
 const baseline=inspect();
 assert.equal(sampleAudit.sample,true,'the bundled sample report is static data and needs no fetch');
 assert.deepEqual(baseline.findings.map(f=>f.id).sort(),[...expectedIds].sort(),'fixture covers every audit check');
+assert.equal(baseline.scoringVersion,SCORING_VERSION,'audit declares the centralized scoring version');
+assert.equal(validateFindingDefinitions(baseline.findings),true,'every finding uses its configured category and weight');
+assert.deepEqual(Object.keys(CHECKS).sort(),[...expectedIds].sort(),'the scoring config documents every check');
 for(const id of expectedIds.filter(id=>!['core-web-vitals','llms-txt','security-headers','hreflang'].includes(id)))assert.equal(status(baseline,id),'good',`good fixture: ${id}`);
 assert.equal(status(baseline,'core-web-vitals'),'improvement','Core Web Vitals requests lab and field confirmation');
 
@@ -40,9 +44,10 @@ expectStatus('mobile-usability','improvement',goodPage.replace(/<meta name="view
 expectStatus('ai-crawlers','improvement',goodPage,{bots:[{bot:'GPTBot',state:'blocked',source:'GPTBot',rule:'Disallow: /'}]});
 expectStatus('llms-txt','optional',goodPage,{llmsTxt:{url:'https://fixture.example/llms.txt',status:404,redirects:0}});
 expectStatus('copy','improvement',shortPage);
-expectStatus('readability','improvement',shortPage);
+expectStatus('readability','optional',shortPage);
 expectStatus('repetition','improvement',goodPage.replace('</main>',`<p>${'Repeat this useful sentence for the fixture test only. '.repeat(5)}</p></main>`));
 expectStatus('paragraphs','improvement',goodPage.replace('</main>',`<p>${'Helpful content gives readers a clear next step. '.repeat(30)}</p></main>`));
+expectStatus('content-gaps','improvement',goodPage.replace('How do planning teams use this audit?','The planning process'));
 expectStatus('text-access','improvement',shortPage);
 expectStatus('sections','improvement',goodPage.replace(/<h2>[^<]*<\/h2>/g,''));
 expectStatus('answers','improvement',goodPage.replace('How do planning teams use this audit?','The planning process'));
@@ -57,4 +62,30 @@ assert.equal(baseline.scores.performance,100,'good performance checks score 100'
 assert.equal(baseline.score,100,'overall score averages the categories');
 const titleImprovement=inspect(goodPage.replace(/<title>.*?<\/title>/,'<title>Brief</title>'));
 assert.equal(titleImprovement.scores.seo,94,'a weighted Improvement contributes 55 points before rounding');
+
+const strongAudit=inspect(strongPage);
+const missingStructuredDataAudit=inspect(missingStructuredDataPage);
+const blockingCrawlerAudit=inspect(blockingAiCrawlerPage,{bots:[{bot:'GPTBot',state:'blocked',source:'GPTBot',rule:'Disallow: /'}]});
+const thinContentAudit=inspect(thinContentPage);
+assert.equal(status(strongAudit,'schema'),'good','strong-page fixture contains supported structured data');
+assert.equal(status(missingStructuredDataAudit,'schema'),'improvement','missing-structured-data fixture is reflected in its finding');
+assert.ok(missingStructuredDataAudit.scores.geo<strongAudit.scores.geo,'missing structured data lowers AI/GEO readiness');
+assert.equal(status(blockingCrawlerAudit,'ai-crawlers'),'improvement','blocked-crawler fixture is reflected in its finding');
+assert.ok(blockingCrawlerAudit.scores.geo<strongAudit.scores.geo,'a blocked evaluated crawler lowers AI/GEO readiness');
+assert.equal(status(thinContentAudit,'copy'),'improvement','thin-content fixture is reflected in its finding');
+assert.equal(status(thinContentAudit,'content-gaps'),'improvement','thin-content fixture records missing question coverage');
+assert.ok(thinContentAudit.scores.content<strongAudit.scores.content,'thin content lowers the content score');
+
+const llmsPresent=inspect(strongPage,{llmsTxt:{url:'https://fixture.example/llms.txt',status:200,redirects:0}});
+const llmsMissing=inspect(strongPage,{llmsTxt:{url:'https://fixture.example/llms.txt',status:404,redirects:0}});
+assert.equal(llmsMissing.findings.find(f=>f.id==='llms-txt')?.weight,0,'llms.txt is excluded from scoring');
+assert.equal(status(llmsMissing,'llms-txt'),'optional','llms.txt is labeled optional');
+assert.deepEqual(llmsMissing.scores,llmsPresent.scores,'llms.txt availability cannot change scores');
+
+const sampleCalculation=calculateScores(sampleAudit.findings);
+assert.equal(validateFindingDefinitions(sampleAudit.findings),true,'sample findings use the centralized check definitions');
+assert.deepEqual(sampleAudit.scores,sampleCalculation.scores,'sample category scores come from the shared calculator');
+assert.equal(sampleAudit.score,sampleCalculation.score,'sample overall score comes from the shared calculator');
+assert.ok(sampleAudit.scores.geo<100,'sample AI/GEO improvements lower the AI/GEO score');
+assert.ok(sampleAudit.scores.content<100,'sample content-gap improvement lowers the content score');
 console.log('Audit check fixtures passed.');

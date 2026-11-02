@@ -44,7 +44,7 @@ assert.match(ogSource,/width:1200/);
 assert.match(ogSource,/height:630/);
 
 assert.deepEqual(robots(),{
- rules:{userAgent:'*',allow:'/',disallow:['/api/','/report/']},
+ rules:{userAgent:'*',allow:'/',disallow:['/api/']},
  sitemap:`${siteUrl}/sitemap.xml`,
  host:siteUrl,
 });

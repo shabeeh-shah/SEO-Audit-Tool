@@ -1,8 +1,12 @@
 'use client';
 
 import {useEffect, useState, type CSSProperties, type ReactNode} from 'react';
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 import {ArrowUpRight, ChartNoAxesColumnIncreasing, CircleHelp, FileText, Gauge, GitBranch, LayoutDashboard, ListChecks, PlayCircle, Plus, Search, Sparkles} from 'lucide-react';
+=======
+import {ArrowUpRight, ChartNoAxesColumnIncreasing, CircleHelp, FileSpreadsheet, FileText, Gauge, GitBranch, LayoutDashboard, ListChecks, PlayCircle, Plus, Search, Sparkles} from 'lucide-react';
+>>>>>>> 34490af62aca935da9c434362028197bd8996447
 import {Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar} from '@/components/ui/sidebar';
 import './signal-dashboard.css';
 
@@ -21,7 +25,8 @@ const sections = [
   {label:'Recommendations', selector:'.findings-panel', icon:ListChecks},
 <<<<<<< Updated upstream
   {label:'Competitor insights', selector:'.competitor-section', icon:ChartNoAxesColumnIncreasing, advanced:true},
-  {label:'Site discovery', selector:'.site-discovery', icon:Search, advanced:true},
+  {label:'Site-wide audit', selector:'.site-discovery', icon:Search, advanced:true},
+  {label:'Bulk audit', selector:'.bulk-audit', icon:FileSpreadsheet, advanced:true},
   {label:'Fix drafts', selector:'.fix-generators', icon:Sparkles, advanced:true},
   {label:'Audit history', selector:'#audit-history', icon:FileText, advanced:true},
   {label:'Page details', selector:'.snapshot-panel', icon:FileText},
