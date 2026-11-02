@@ -34,7 +34,8 @@ export function extractProfile(html:string,url:string):PageProfile{
  const words=normalize(text).split(' ').filter(Boolean).length;
  return {url,title,words,text,headings,answers,schemaTypes:[...new Set(schemaTypes)].slice(0,20),topics:[...new Set(tokens(text))].slice(0,12),h1:headings.filter(h=>h.level===1).length,h2:headings.filter(h=>h.level===2).length,h3:headings.filter(h=>h.level===3).length,questions:headings.filter(h=>/\?|^(how|what|why|when|where|who|can|does|is|are)\b/i.test(h.text)).length,lists:root.querySelectorAll('ul,ol').length,tables:root.querySelectorAll('table').length,intent:estimateIntent(title,headings.map(h=>h.text)),limited:words<80||full.length>120000};
 }
-const publicProfile=({text,...profile}:PageProfile)=>profile;
+// Body text stays internal to the comparison; responses contain summary evidence.
+const publicProfile=({text,...profile}:PageProfile)=>{void text;return profile;};
 function snippet(page:PageProfile,term:string){const heading=page.headings.find(h=>counts(h.text,term));if(heading)return heading.text;const at=page.text.toLowerCase().indexOf(term.toLowerCase());return clean(page.text.slice(Math.max(0,at-60),Math.max(0,at-60)+220));}
 export function compareProfiles(baseline:PageProfile,competitors:PageProfile[],target=''):CompetitorReport{
  const candidates=new Set<string>();const brandWords=new Set([baseline,...competitors].flatMap(page=>new URL(page.url).hostname.split(/[.\-]/)).filter(word=>word.length>2));

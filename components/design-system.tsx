@@ -1,11 +1,12 @@
 'use client';
-import type {ComponentProps,ReactNode} from 'react';
+import {useRef,type ComponentProps,type ReactNode} from 'react';
+import {DialogContent as PrimitiveDialogContent} from '@/components/ui/dialog';
 import {LoaderCircle} from 'lucide-react';
 import {Button as PrimitiveButton} from '@/components/ui/button';
 import type {Status} from '@/lib/audit/types';
 import {gradeFor} from '@/lib/audit/bulk';
 export {Tabs,TabsList,TabsTrigger,TabsContent} from '@/components/ui/tabs';
-export {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription,DialogTrigger} from '@/components/ui/dialog';
+export {Dialog,DialogHeader,DialogTitle,DialogDescription,DialogTrigger} from '@/components/ui/dialog';
 export {Sheet as Drawer,SheetContent as DrawerContent,SheetHeader as DrawerHeader,SheetTitle as DrawerTitle,SheetDescription as DrawerDescription} from '@/components/ui/sheet';
 export {DropdownMenu,DropdownMenuTrigger,DropdownMenuContent,DropdownMenuItem} from '@/components/ui/dropdown-menu';
 export {Tooltip,TooltipTrigger,TooltipContent,TooltipProvider} from '@/components/ui/tooltip';
@@ -21,3 +22,9 @@ export function ProgressSteps({steps,current=0,states}:{steps:string[];current?:
 export function EmptyState({title,description,action}:{title:string;description:string;action?:ReactNode}){return <div className="ds-empty"><h3>{title}</h3><p>{description}</p>{action}</div>;}
 export function Skeleton({label='Loading content'}:{label?:string}){return <div className="ds-skeleton" role="status" aria-label={label}><span/><span/><span/></div>;}
 export function PageHeader({title,description,actions}:{title:string;description:string;actions?:ReactNode}){return <header className="ws-page-header"><div><h1 id="workspace-title" tabIndex={-1}>{title}</h1><p>{description}</p></div>{actions}</header>;}
+
+/** Standalone dialog controls also restore focus; a custom destination takes precedence. */
+export function DialogContent({onOpenAutoFocus,onCloseAutoFocus,...props}:ComponentProps<typeof PrimitiveDialogContent>){
+ const restore=useRef<HTMLElement|null>(null);
+ return <PrimitiveDialogContent {...props} onOpenAutoFocus={event=>{restore.current=document.activeElement as HTMLElement;onOpenAutoFocus?.(event);}} onCloseAutoFocus={event=>{onCloseAutoFocus?.(event);if(!event.defaultPrevented&&restore.current?.isConnected){event.preventDefault();restore.current.focus({preventScroll:true});}}}/>;
+}

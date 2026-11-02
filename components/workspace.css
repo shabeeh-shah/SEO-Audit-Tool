@@ -24,3 +24,34 @@
 
 /* Output tables keep their actions reachable on narrow screens. */
 .history-row-url{display:block;max-width:260px;overflow-wrap:anywhere;font-weight:600;margin-bottom:6px}.history-row-actions{display:flex;flex-wrap:wrap;gap:8px}.audit-history .signal-table td small{display:block;margin-top:6px;min-width:110px}.bulk-table-wrap caption{text-align:left;padding:12px;font-weight:650}.ws-bulk-progress li{overflow-wrap:anywhere}.bulk-input-grid:focus-within{outline-offset:4px}.bulk-error button{margin-top:8px}.ws-main .bulk-audit>.ds-card{margin-top:24px}
+
+/* Keyboard helpers and non-modal onboarding use the same contrast and focus tokens. */
+.ws-command :is(input,button){color:var(--ds-text)}.ws-command input::placeholder{color:var(--ds-muted);opacity:1}.ws-command-empty{padding:20px;color:var(--ds-muted)}.ws-command-list button:focus-visible{background:var(--ds-bg);outline:3px solid var(--ds-accent);outline-offset:-3px}.ws-command-button{font-size:11px}.ws-tour:focus-visible{outline:3px solid var(--ds-accent);outline-offset:3px}.ws-tour button{min-height:44px}.ws-tour [data-variant=ghost]{color:var(--ds-text)}[data-tour-target=true]{outline:3px solid var(--ds-accent)!important;outline-offset:4px}#workspace-main{scroll-margin-top:140px}.ws-shell input::placeholder{color:var(--ds-muted);opacity:1}.ws-topbar :is(a,button){color:var(--ds-text)}.ws-more :focus-visible{outline:3px solid var(--ds-accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Small labels and notification text also meet the body-text contrast target. */
+.ws-main :is(.preview-fallback>span,.preview-fallback>p,.visual-preview>p,.eyebrow){color:var(--ds-muted)}
+
+/* Legacy feature panels share the tested foreground/background pairs in both themes. */
+.ws-shell .ws-skip{background:var(--ds-card);color:var(--ds-text)}.ws-shell .ws-brand span{color:var(--ds-accent)}
+.ws-main :is(.rendering-copy p,.rendering-counts span,.rendering-counts small,.snapshot-panel dt,.snapshot-note,.topic-note,.keywords b,.insight-card p,.insight-card>span:last-child){color:var(--ds-muted)}
+.ws-main .rendering-counts>div{background:var(--ds-bg);border-color:var(--ds-border)}.ws-main .rendering-counts b{color:var(--ds-text)}
+.ws-main .optional-signals article>strong{background:var(--ds-optional-bg);color:var(--ds-optional)}
+.ws-main .competitor-section :is(p,small,.competitor-inputs label>span,.competitor-summary-grid article>span){color:var(--ds-muted)}
+.ws-main .competitor-section :is(.competitor-evidence,.competitor-example,.competitor-target){background:var(--ds-bg);border-color:var(--ds-border)}
+.ws-main .competitor-section .competitor-evidence :is(span,strong){color:var(--ds-text)}
+.ws-main .competitor-section .competitor-priority.high{background:var(--ds-success-bg);color:var(--ds-success)}.ws-main .competitor-section .competitor-priority.medium{background:var(--ds-warning-bg);color:var(--ds-warning)}
+.ws-main .competitor-section .competitor-notice{background:var(--ds-warning-bg);color:var(--ds-warning)}
+.ws-main .competitor-table :is(th,td){background:var(--ds-card);color:var(--ds-text);border-color:var(--ds-border)}.ws-main .competitor-table thead th{background:var(--ds-bg)}.ws-main .competitor-table strong{color:var(--ds-text)}
+.ws-main .bulk-file{background:var(--ds-bg);border-color:var(--ds-border)}.ws-main .bulk-file span{color:var(--ds-text)}.ws-main .bulk-table-wrap th{background:var(--ds-bg);color:var(--ds-text)}
+.ws-main .history-chart,.ws-main .history-count{background:var(--ds-bg);color:var(--ds-text)}.ws-main .history-chart text{fill:var(--ds-muted)}.ws-main .history-chart line{stroke:var(--ds-border)}.ws-main .history-chart polyline{stroke:var(--ds-accent)}.ws-main .history-chart circle{fill:var(--ds-accent)}
+.ws-main .scope-note button{color:var(--ds-accent)}.ws-main .footer-brand{color:var(--ds-text)}
+[data-slot=dialog-content],[data-slot=sheet-content]{background:var(--ds-card);color:var(--ds-text)}
+html [data-sonner-toast][data-type=success]{color:var(--ds-success)!important;background:var(--ds-success-bg)!important;border-color:var(--ds-border)!important}
+html [data-sonner-toast][data-type=info]{color:var(--ds-optional)!important;background:var(--ds-optional-bg)!important;border-color:var(--ds-border)!important}
+html [data-sonner-toast][data-type=warning]{color:var(--ds-warning)!important;background:var(--ds-warning-bg)!important;border-color:var(--ds-border)!important}
+html [data-sonner-toast][data-type=error]{color:var(--ds-danger)!important;background:var(--ds-danger-bg)!important;border-color:var(--ds-border)!important}
+.ws-main .scope-note p,.ws-main .report-footer>span,.ws-main .history-chart-title>span{color:var(--ds-muted)}
+.ws-main :is(.preview-top,.preview-fallback){background:var(--ds-card)}.ws-main .preview-top a{color:var(--ds-accent)}
+
+.ws-top-fixes{scroll-margin-top:140px}.ws-tour{max-height:calc(100svh - 180px);overflow-y:auto}

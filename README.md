@@ -98,6 +98,10 @@ The score summarizes this documented ruleset. It does not predict or guarantee i
 
 Open a focused issue or pull request. Every new feature needs tests, and changes must preserve the existing URL-safety and SSRF protections. Do not add third-party network calls without prior discussion. Keep findings evidence-based and avoid ranking or AI-citation predictions.
 
+Use Cmd/Ctrl+K for views, new-audit entry, theme, exports, and GitHub; `/` focuses the URL field and `?` opens the shortcuts sheet. Single-key shortcuts leave editable fields and dialogs alone. The welcome tour runs once when browser storage is available and can be replayed from the shortcuts sheet. If no report exists, its final step uses the offline sample.
+
+After building, run `npm run test:e2e` for desktop (1280px) and mobile (390px) coverage. The suite includes keyboard-only flows, per-view automated WCAG scans, a 4.5:1 text-contrast check in both themes, reduced motion, and screenshots in `docs/screenshots/`. See [accessibility verification](docs/accessibility-checks.md) for scope and remaining manual checks.
+
 Run typecheck, lint, tests, and build before submitting. Report security issues privately to the repository owner rather than in a public issue.
 
 Signal is [MIT licensed](LICENSE), Copyright © 2026 Shabeeh Shah. Third-party packages retain their own licenses; the vendored axe-core license is in [`public/vendor/AXE-LICENSE.txt`](public/vendor/AXE-LICENSE.txt).

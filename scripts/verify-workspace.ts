@@ -118,3 +118,12 @@ const {default:AiReadiness}=await import('../components/ai-readiness');
 const readiness=renderToStaticMarkup(createElement(AiReadiness,{audit:{...sampleAudit,aiReadiness:{...sampleAudit.aiReadiness,bots:sampleAudit.aiReadiness.bots.slice(0,3).map((bot,index)=>({...bot,state:(['allowed','blocked','unknown'] as const)[index]}))}}}));
 assert.match(readiness,/Allowed/);assert.match(readiness,/Blocked/);assert.match(readiness,/Unknown/);assert.match(readiness,/do not affect any score/);
 assert.match(readiness,/does not guarantee discovery, rankings, use, or AI citations/);
+
+const {workspaceShortcut,nextCommandIndex}=await import('../lib/workspace-accessibility');
+assert.equal(workspaceShortcut({key:'k',ctrlKey:true,editing:true}),'palette');
+assert.equal(workspaceShortcut({key:'K',metaKey:true}),'palette');
+assert.equal(workspaceShortcut({key:'/',editing:false}),'url');assert.equal(workspaceShortcut({key:'?'}),'shortcuts');
+for(const flags of [{editing:true},{modal:true},{isComposing:true},{defaultPrevented:true},{repeat:true},{altKey:true},{ctrlKey:true},{metaKey:true}])assert.equal(workspaceShortcut({key:'/',...flags}),null);
+assert.equal(workspaceShortcut({key:'k',ctrlKey:true,modal:true}),null);assert.equal(workspaceShortcut({key:'k',ctrlKey:true,modal:true,paletteOpen:true}),'palette');
+assert.equal(workspaceShortcut({key:'Escape'}),null);
+assert.equal(nextCommandIndex(0,'ArrowUp',3),2);assert.equal(nextCommandIndex(2,'ArrowDown',3),0);assert.equal(nextCommandIndex(1,'Home',3),0);assert.equal(nextCommandIndex(0,'End',3),2);assert.equal(nextCommandIndex(0,'ArrowDown',0),-1);
