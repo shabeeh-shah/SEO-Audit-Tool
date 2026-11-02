@@ -131,3 +131,51 @@ test('completion survives unavailable storage in memory and copy errors give use
  await page.addInitScript(()=>{const get=Storage.prototype.getItem,set=Storage.prototype.setItem;Storage.prototype.getItem=function(key){if(key.startsWith('signal-completed:'))throw new Error('storage blocked');return get.call(this,key);};Storage.prototype.setItem=function(key,value){if(key.startsWith('signal-completed:'))throw new Error('storage blocked');return set.call(this,key,value);};Object.defineProperty(navigator,'clipboard',{value:{writeText:()=>Promise.reject(new Error('clipboard blocked'))}});});
  await audit(page);await go(page,'recommendations',isMobile);await expect(page.locator('.ws-recommendations')).toContainText('Browser storage is unavailable');const row=page.locator('.ws-task').first();await row.getByRole('checkbox').check();await expect(page.locator('.ws-task-progress')).toContainText('1 of');await row.getByRole('button',{name:/^Open /}).click();const detail=isMobile?page.getByRole('dialog'):row.locator('.ws-fix-detail');await detail.getByRole('button',{name:'Copy fix',exact:true}).click();await expect(page.locator('[data-sonner-toast]').filter({hasText:'Copy failed'})).toBeVisible();
 });
+
+test('analysis views share summaries, grouped evidence and contextual actions',async({page,isMobile})=>{
+ await audit(page);
+ for(const [view,summary,cards,action] of [
+  ['seo-content','SEO and content summary',['Title and description','Headings outline','Images and alt text','Internal links','Readability','Topics found'],'Re-check'],
+  ['ai-readiness','AI search readiness summary',['AI crawler access','Publisher signals','Answer and trust signals','Optional'],'Copy robots.txt snippet'],
+  ['performance','Performance and mobile summary',['Browser lab metrics','Mobile usability','Image warnings','Performance bottlenecks'],'Re-check'],
+ ] as const){
+  await go(page,view,isMobile);await expect(page.getByRole('region',{name:summary,exact:true})).toBeVisible();
+  for(const title of cards)await expect(page.getByRole('heading',{name:title,exact:true}).first()).toBeVisible();
+  await expect(page.locator('.ws-page-actions').getByRole('button',{name:action,exact:true})).toBeEnabled();await expect(page.locator('.ws-next')).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  await page.screenshot({path:`docs/screenshots/analysis-${view}-${isMobile?'390':'1280'}.png`,fullPage:true});
+ }
+ await go(page,'ai-readiness',isMobile);await expect(page.getByRole('table',{name:'robots.txt access signals'})).toContainText('GPTBot');
+ await expect(page.getByRole('region',{name:'AI search readiness summary'})).toContainText('do not predict or guarantee');
+ await expect(page.locator('.optional-signals')).toContainText('do not affect any score');
+ await page.locator('.ws-page-actions').getByRole('button',{name:'Copy robots.txt snippet'}).click();await expect(page.getByText('Snippet copied. Review it before publishing.',{exact:true})).toBeVisible();
+ await go(page,'performance',isMobile);await expect(page.locator('.ws-range-note')).toContainText('LCP good ≤ 2.5 s');
+ await page.getByRole('link',{name:'Review real-user field data ↓'}).click();await expect(page.locator('#field-data')).toBeInViewport();
+ await page.locator('.ws-page-actions').getByRole('button',{name:'Re-check',exact:true}).click();await expect(page).toHaveURL(/report\/performance\?url=/);
+});
+
+test('competitor comparison keeps page evidence and submits the contextual form',async({page,isMobile})=>{
+ const {sampleComparison}=await import('../../lib/audit/competitors');let payload:unknown;
+ await page.route('**/api/compare',route=>{payload=route.request().postDataJSON();return route.fulfill({json:{...sampleComparison(),sample:false}});});
+ await audit(page);await go(page,'competitors',isMobile);
+ await page.getByLabel('Your page URL').fill(live.url);await page.getByLabel('Competitor page 1').fill('https://rival.example/');
+ await page.getByLabel('Competitor page 2').fill('https://second.example/');await page.getByLabel('Target phrase').fill('brand strategy');
+ await page.locator('.ws-page-actions').getByRole('button',{name:'Compare pages',exact:true}).click();
+ await expect(page.getByRole('table',{name:'Page structure and intent evidence'})).toBeVisible();
+ for(const text of ['Questions with short answers','Schema types','Topics found'])await expect(page.getByRole('rowheader',{name:text,exact:true})).toBeVisible();
+ expect(payload).toEqual({url:live.url,competitors:['https://rival.example/','https://second.example/'],target:'brand strategy'});
+ await expect(page.getByRole('heading',{name:'Gaps you could fill',exact:true})).toBeVisible();await expect(page.getByText(/does not assess completeness or correctness/)).toBeVisible();
+ await page.screenshot({path:`docs/screenshots/analysis-competitors-${isMobile?'390':'1280'}.png`,fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});
+
+test('Pages contextual action uses the selected bounded limit and sorts real rows',async({page,isMobile})=>{
+ const first=analyzeCrawlPage('<html><head><title>Alpha</title></head><body><h1>Alpha page</h1></body></html>',{url:'https://example.com/a',finalUrl:'https://example.com/a',status:200,redirects:0,attempts:1,issue:''});
+ const second={...first,url:'https://example.com/z',title:'Zulu',status:503};let requestedLimit=0;
+ await page.route('**/api/crawl',route=>{requestedLimit=route.request().postDataJSON().limit;return route.fulfill({json:crawlSummary([second,first],[],10,false)});});
+ await audit(page);await go(page,'pages',isMobile);await page.getByLabel('Page limit').selectOption('10');await page.locator('.ws-page-actions').getByRole('button',{name:'Audit pages',exact:true}).click();
+ const table=page.getByRole('region',{name:'Audited pages table'});await expect(table).toBeVisible();expect(requestedLimit).toBe(10);
+ await expect(table.locator('tbody tr').first()).toContainText('Alpha');await page.getByRole('button',{name:'HTTP ↕',exact:true}).click();await page.getByRole('button',{name:'HTTP ↕',exact:true}).click();await expect(table.locator('tbody tr').first()).toContainText('Zulu');
+ await page.getByRole('button',{name:'View Zulu',exact:true}).click();await expect(page.getByRole('dialog')).toContainText('HTTP 503');await page.keyboard.press('Escape');
+ await page.screenshot({path:`docs/screenshots/analysis-pages-${isMobile?'390':'1280'}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});

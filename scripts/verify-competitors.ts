@@ -49,3 +49,15 @@ try{
  assert.equal((await POST(request(['https://rival.com/'],'fixture-rate'))).status,429);
 }finally{globalThis.fetch=originalFetch;}
 console.log('Competitor comparison fixtures and fetch protections passed.');
+
+// Answer evidence is structural, bounded, and distinct from a question heading alone.
+const paragraph=(count:number)=>Array(count).fill('word').join(' ');
+for(const count of [7,8,60,61]){
+ const profile=extractProfile(`<html><body><main><h2>How does it work?</h2><p>${paragraph(count)}</p></main></body></html>`,'https://fixture.example/');
+ assert.equal(profile.questions,1);assert.equal(profile.answers,count>=8&&count<=60?1:0);
+}
+const answerFixture=extractProfile(`<html><body><main><h2>What is included?</h2><div><p>${paragraph(10)}</p></div><h2>Services</h2><p>${paragraph(10)}</p><section hidden><h2>Why use it?</h2><p>${paragraph(10)}</p></section><h2>Can I begin?</h2><p>${paragraph(10)}</p><script>What is this?</script></main></body></html>`,'https://fixture.example/');
+assert.equal(answerFixture.questions,2);assert.equal(answerFixture.answers,1);
+
+assert.match(comparisonHtml(report),/Questions with short answers/);assert.match(comparisonHtml(report),/does not assess completeness or correctness/);
+assert.match(comparisonHtml({...report,baseline:{...report.baseline,answers:undefined}}),/Not checked/);

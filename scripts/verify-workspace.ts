@@ -86,3 +86,35 @@ assert.doesNotMatch(noSnippet,/Copy fix/);assert.match(noSnippet,/excluded from 
 
 const goodHighWeight={...actionFixture[4],id:'lang',weight:5};
 assert.equal(sortActionFindings([goodHighWeight,{...actionFixture[3],weight:1}])[0].status,'improvement');
+
+// Analysis summaries and lab thresholds preserve unknown states and never mutate crawl evidence.
+const {labBand,labRanges,mobileSummary,sortCrawlPages}=await import('../lib/analysis-display');
+for(const value of [null,undefined,NaN,-1,Infinity])assert.equal(labBand(value,'lcp').label,'Unavailable');
+for(const [metric,good,middle] of [['lcp',2500,4000],['cls',.1,.25]] as const){
+ assert.equal(labBand(good,metric).label,'Good');assert.equal(labBand(good+.001,metric).label,'Needs improvement');
+ assert.equal(labBand(middle,metric).label,'Needs improvement');assert.equal(labBand(middle+.001,metric).label,'Poor');
+ assert.match(labRanges(metric),/Good.*Needs improvement.*Poor/);
+}
+assert.equal(mobileSummary(null),'Unavailable');
+assert.equal(mobileSummary({...sampleAudit.performance.lab!,mobileOverflow:false,smallTapTargets:0}),'No checked issues observed');
+assert.equal(mobileSummary({...sampleAudit.performance.lab!,mobileOverflow:true}),'Review mobile findings');
+const sorting=[{...crawl,url:'https://b.example/',status:500},{...crawl,url:'https://a.example/',status:200}];
+for(const key of ['url','grade','http','issue'] as const){
+ const sorted=sortCrawlPages(sorting,key,'ascending');assert.equal(sorted.length,2);
+ assert.notEqual(sorted,sorting);assert.deepEqual(sorting.map(page=>page.url),['https://b.example/','https://a.example/']);
+}
+assert.equal(sortCrawlPages(sorting,'http','ascending')[0].status,200);
+assert.equal(sortCrawlPages(sorting,'grade','descending')[0].status,200);
+assert.equal(sortCrawlPages(sorting,'url','descending')[0].url,'https://b.example/');
+assert.deepEqual(sortCrawlPages([],'url','ascending'),[]);
+const {SummaryStrip}=await import('../components/analysis-summary');
+const summary=renderToStaticMarkup(createElement(SummaryStrip,{label:'Check summary',items:[{label:'Words',value:0},{label:'Page',value:'<script>alert(1)</script>'}],note:'Raw HTML only'}));
+assert.match(summary,/<dd>0<\/dd>/);assert.match(summary,/&lt;script&gt;/);assert.doesNotMatch(summary,/<script>/);assert.match(summary,/Raw HTML only/);
+const {default:PerformanceMobile}=await import('../components/performance-mobile');
+const unavailable=renderToStaticMarkup(createElement(PerformanceMobile,{audit:sampleAudit,lab:null,rendering:false}));
+assert.match(unavailable,/Unavailable/);assert.match(unavailable,/Requires real interaction/);assert.doesNotMatch(unavailable,/No checked issues observed/);
+assert.match(unavailable,/Review real-user field data/);
+const {default:AiReadiness}=await import('../components/ai-readiness');
+const readiness=renderToStaticMarkup(createElement(AiReadiness,{audit:{...sampleAudit,aiReadiness:{...sampleAudit.aiReadiness,bots:sampleAudit.aiReadiness.bots.slice(0,3).map((bot,index)=>({...bot,state:(['allowed','blocked','unknown'] as const)[index]}))}}}));
+assert.match(readiness,/Allowed/);assert.match(readiness,/Blocked/);assert.match(readiness,/Unknown/);assert.match(readiness,/do not affect any score/);
+assert.match(readiness,/does not guarantee discovery, rankings, use, or AI citations/);

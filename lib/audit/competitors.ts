@@ -2,7 +2,7 @@
 import {parseHTML} from 'linkedom/worker';
 
 export type Intent = {label:string; signals:string[]};
-export type PageProfile = {url:string; title:string; words:number; text:string; headings:{level:number;text:string}[]; h1:number; h2:number; h3:number; questions:number; lists:number; tables:number; intent:Intent; limited:boolean; schemaTypes?:string[]; topics?:string[]};
+export type PageProfile = {url:string; title:string; words:number; text:string; headings:{level:number;text:string}[]; h1:number; h2:number; h3:number; questions:number; answers?:number; lists:number; tables:number; intent:Intent; limited:boolean; schemaTypes?:string[]; topics?:string[]};
 export type Evidence = {url:string; excerpt:string};
 export type Opportunity = {term:string; priority:'High'|'Medium'; evidence:Evidence[]; why:string; fix:string; example:string};
 export type CompetitorReport = {date:string; sample?:boolean; target:string; baseline:Omit<PageProfile,'text'>; competitors:Omit<PageProfile,'text'>[]; keywords:Opportunity[]; gaps:Opportunity[]; targetCoverage:{url:string; count:number; inTitle:boolean; inHeading:boolean}[]; errors:{url:string; message:string}[]};
@@ -28,9 +28,11 @@ export function extractProfile(html:string,url:string):PageProfile{
  const blocks='h1,h2,h3,h4,h5,h6,p,li,td,th,dt,dd';
  const paragraphs=Array.from(root.querySelectorAll(blocks)).filter(node=>{for(let parent=node.parentElement;parent&&parent!==root;parent=parent.parentElement)if(parent.matches(blocks))return false;return true;}).map(node=>clean(node.textContent||''));
  const full=clean(paragraphs.length?paragraphs.join(' '):root.textContent||'');const text=full.slice(0,120000);
- const headings=Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6')).slice(0,100).map(node=>({level:Number(node.tagName.slice(1)),text:clean(node.textContent||'').slice(0,240)}));
+ const headingNodes=Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6')).slice(0,100);
+ const answers=headingNodes.filter(node=>{if(!/\?|^(how|what|why|when|where|who|can|does|is|are)\b/i.test(clean(node.textContent||'')))return false;const next=node.nextElementSibling;if(next?.tagName!=='P')return false;const count=normalize(next.textContent||'').split(' ').filter(Boolean).length;return count>=8&&count<=60;}).length;
+ const headings=headingNodes.map(node=>({level:Number(node.tagName.slice(1)),text:clean(node.textContent||'').slice(0,240)}));
  const words=normalize(text).split(' ').filter(Boolean).length;
- return {url,title,words,text,headings,schemaTypes:[...new Set(schemaTypes)].slice(0,20),topics:[...new Set(tokens(text))].slice(0,12),h1:headings.filter(h=>h.level===1).length,h2:headings.filter(h=>h.level===2).length,h3:headings.filter(h=>h.level===3).length,questions:headings.filter(h=>/\?|^(how|what|why|when|where|who|can|does|is|are)\b/i.test(h.text)).length,lists:root.querySelectorAll('ul,ol').length,tables:root.querySelectorAll('table').length,intent:estimateIntent(title,headings.map(h=>h.text)),limited:words<80||full.length>120000};
+ return {url,title,words,text,headings,answers,schemaTypes:[...new Set(schemaTypes)].slice(0,20),topics:[...new Set(tokens(text))].slice(0,12),h1:headings.filter(h=>h.level===1).length,h2:headings.filter(h=>h.level===2).length,h3:headings.filter(h=>h.level===3).length,questions:headings.filter(h=>/\?|^(how|what|why|when|where|who|can|does|is|are)\b/i.test(h.text)).length,lists:root.querySelectorAll('ul,ol').length,tables:root.querySelectorAll('table').length,intent:estimateIntent(title,headings.map(h=>h.text)),limited:words<80||full.length>120000};
 }
 const publicProfile=({text,...profile}:PageProfile)=>profile;
 function snippet(page:PageProfile,term:string){const heading=page.headings.find(h=>counts(h.text,term));if(heading)return heading.text;const at=page.text.toLowerCase().indexOf(term.toLowerCase());return clean(page.text.slice(Math.max(0,at-60),Math.max(0,at-60)+220));}
