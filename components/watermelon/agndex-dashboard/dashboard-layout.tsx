@@ -1,16 +1,25 @@
 'use client';
 
 import {useEffect, useState, type CSSProperties, type ReactNode} from 'react';
+<<<<<<< Updated upstream
 import {ArrowUpRight, ChartNoAxesColumnIncreasing, CircleHelp, FileText, Gauge, GitBranch, LayoutDashboard, ListChecks, PlayCircle, Plus, Search, Sparkles} from 'lucide-react';
 import {Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar} from '@/components/ui/sidebar';
 import './signal-dashboard.css';
 
 type DashboardLayoutProps = {children:ReactNode; onSample?:()=>void; onHelp?:()=>void; sample?:boolean; saved?:boolean; loading?:boolean; advanced?:boolean};
+=======
+import {ArrowUpRight, ChartNoAxesColumnIncreasing, CircleHelp, FileText, Gauge, GitBranch, LayoutDashboard, ListChecks, PlayCircle, Plus, Sparkles} from 'lucide-react';
+import {Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar} from '@/components/ui/sidebar';
+import './signal-dashboard.css';
+
+type DashboardLayoutProps = {children:ReactNode; onSample?:()=>void; onHelp?:()=>void; sample?:boolean; loading?:boolean; advanced?:boolean};
+>>>>>>> Stashed changes
 const sections = [
   {label:'Audit overview', selector:'#audit-overview', icon:LayoutDashboard},
   {label:'Performance & mobile', selector:'.performance-section', icon:Gauge, advanced:true},
   {label:'AI search readiness', selector:'.ai-readiness-section', icon:Sparkles, advanced:true},
   {label:'Recommendations', selector:'.findings-panel', icon:ListChecks},
+<<<<<<< Updated upstream
   {label:'Competitor insights', selector:'.competitor-section', icon:ChartNoAxesColumnIncreasing, advanced:true},
   {label:'Site discovery', selector:'.site-discovery', icon:Search, advanced:true},
   {label:'Fix drafts', selector:'.fix-generators', icon:Sparkles, advanced:true},
@@ -19,6 +28,12 @@ const sections = [
 ];
 
 function DashboardFrame({children,onSample,onHelp,sample=true,saved=false,loading=false,advanced=false}:DashboardLayoutProps){
+=======
+  {label:'Page details', selector:'.snapshot-panel', icon:FileText},
+];
+
+function DashboardFrame({children,onSample,onHelp,sample=true,loading=false,advanced=false}:DashboardLayoutProps){
+>>>>>>> Stashed changes
   const {setOpenMobile}=useSidebar();
   const [active,setActive]=useState('Audit overview');
   useEffect(()=>{
@@ -42,7 +57,11 @@ function DashboardFrame({children,onSample,onHelp,sample=true,saved=false,loadin
       </SidebarContent>
       <SidebarFooter className="signal-sidebar-footer">{onHelp&&<SidebarMenuButton onClick={()=>{setOpenMobile(false);onHelp();}}><CircleHelp/><span>How scoring works</span></SidebarMenuButton>}<SidebarMenuButton asChild><a href="https://github.com/shabeeh-shah/SEO-Audit-Tool" target="_blank" rel="noreferrer"><GitBranch/><span>View on GitHub</span><ArrowUpRight size={14}/></a></SidebarMenuButton><span className="signal-sidebar-caption">SEO · Content · AI readiness</span></SidebarFooter>
     </Sidebar>
+<<<<<<< Updated upstream
     <div className="signal-dashboard-main"><header className="signal-dashboard-topbar"><div className="signal-breadcrumb"><SidebarTrigger/><span className="signal-breadcrumb-parent">Workspace</span><span aria-hidden="true">/</span><strong>{active}</strong></div><div className="signal-topbar-actions"><span className={'signal-report-mode '+(loading?'is-loading':'')}><i/>{loading?'Audit in progress':sample?'Sample report':saved?'Saved audit':'Live audit'}</span>{onHelp&&<button className="signal-topbar-help" onClick={onHelp} aria-label="How Signal works"><CircleHelp size={18}/></button>}</div></header><div id="signal-content" tabIndex={-1}>{children}</div></div>
+=======
+    <div className="signal-dashboard-main"><header className="signal-dashboard-topbar"><div className="signal-breadcrumb"><SidebarTrigger/><span className="signal-breadcrumb-parent">Workspace</span><span aria-hidden="true">/</span><strong>{active}</strong></div><div className="signal-topbar-actions"><span className={'signal-report-mode '+(loading?'is-loading':'')}><i/>{loading?'Audit in progress':sample?'Sample report':'Live audit'}</span>{onHelp&&<button className="signal-topbar-help" onClick={onHelp} aria-label="How Signal works"><CircleHelp size={18}/></button>}</div></header><div id="signal-content" tabIndex={-1}>{children}</div></div>
+>>>>>>> Stashed changes
   </>;
 }
 
